@@ -221,10 +221,11 @@ module.exports = {
         contOptions.Env.push(`VIRTUAL_HOST=${options.name}.${domain}`);
         //httpStorage settings
         contOptions.Env.push(`FORGE_PROJECT_ID=${id}`)
+        contOptions.Env.push(`FORGE_PROJECT_TOKEN=${options.projectToken}`)
         contOptions.Env.push(`FORGE_STORAGE_URL=${options.storageURL}`)
-        contOptions.Env.push(`FORGE_STORAGE_TOKEN=${options.storageSecret}`)
+        contOptions.Env.push(`FORGE_STORAGE_TOKEN=${options.projectToken || "ABCD"}`)
         contOptions.Env.push(`FORGE_AUDIT_URL=${process.env["BASE_URL"] + "/logging"}`);
-        contOptions.Env.push(`FORGE_AUDIT_TOKEN=${options.loggingSecret || "forbar"}`);
+        contOptions.Env.push(`FORGE_AUDIT_TOKEN=${options.projectToken || "ABCD"}`);
 
         try {
             let container = await this._docker.createContainer(contOptions);
