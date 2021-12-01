@@ -115,7 +115,7 @@ module.exports = {
         + "flowFile: 'flows.json', " 
         + "flowFilePretty: true, "
         + "adminAuth: require('@flowforge/nr-auth')({ "
-        + " baseURL: 'http://localhost:" + project.port + "', "
+        + " baseURL: '" + project.url + "', "
         + " forgeURL: '" + process.env["BASE_URL"] + "', "
         + " clientID: '" + options.clientID + "', "
         + " clientSecret: '" + options.clientSecret + "' "
