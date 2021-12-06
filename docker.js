@@ -31,7 +31,7 @@ module.exports = {
         projects.forEach(async (project) => {
             let forgeProject = await this._app.db.models.Project.byId(project.id);
             if (forgeProject) {
-                let container = await this._docker.getContainer(forgeProject.name)
+                let container = await this._docker.getContainer(project.id)
                 if (container) {
                     let state = await container.inspect()
                     if (!state.State.Running) {
@@ -76,8 +76,8 @@ module.exports = {
     remove: async (id) => {
         console.log("removing ", id)
         try {
-            let forgeProject = await this._app.db.models.Project.byId(id);
-            let container = await this._docker.getContainer(forgeProject.name);
+            // let forgeProject = await this._app.db.models.Project.byId(id);
+            let container = await this._docker.getContainer(id)//forgeProject.name);
             await container.stop()
             await container.remove()
             let project = await this._app.db.models.DockerProject.byId(id)
@@ -95,10 +95,18 @@ module.exports = {
      */
     details: async (id) => {
         try {
-            let container = await this._docker.getContainer(id);
-            return container
+            // let forgeProject = await this._app.db.models.Project.byId(id);
+            let container = await this._docker.getContainer(id)//forgeProject.name);
+            //console.log(container);
+            let inspect = await container.inspect()
+            return Promise.resolve({
+                id: id,
+                state: inspect.State.Running ? "running" : "stopped",
+                meta: container
+            })
         } catch (err) {
-            return {error: err}
+            console.log(err)
+            return Promise.resolve({error: err})
         }
     },
     /**
@@ -189,7 +197,7 @@ module.exports = {
 
         let contOptions = {
             Image: image,
-            name: options.name,
+            name: id, //options.name,
             Env: [],
             Labels: {},
             AttachStdin: false,
