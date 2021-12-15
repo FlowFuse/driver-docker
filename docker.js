@@ -33,7 +33,12 @@ module.exports = {
             const projectSettings = await project.getAllSettings();
             // let forgeProject = await this._app.db.models.Project.byId(project.id);
             if (project) {
-                let container = await this._docker.getContainer(project.id)
+                let container
+                try {
+                    container = await this._docker.getContainer(project.id)
+                } catch (err) {
+
+                }
                 if (container) {
                     let state = await container.inspect()
                     if (!state.State.Running) {
@@ -125,33 +130,6 @@ module.exports = {
       settings.baseURL = project.url
       settings.forgeURL = process.env["BASE_URL"]
 
-      // settings.settings = "module.exports = { "
-      //   + "flowFile: 'flows.json', " 
-      //   + "flowFilePretty: true, "
-      //   + "adminAuth: require('@flowforge/nr-auth')({ "
-      //   + " baseURL: '" + project.url + "', "
-      //   + " forgeURL: '" + process.env["BASE_URL"] + "', "
-      //   + " clientID: '" + options.clientID + "', "
-      //   + " clientSecret: '" + options.clientSecret + "' "
-      //   + " }),"
-      //   + "storageModule: require('@flowforge/nr-storage'), "
-      //   + "httpStorage: { "
-      //   + "projectID: '" + id + "', "
-      //   + "baseURL: '" + options.storageURL + "', " 
-      //   + "token: '" + options.projectToken + "', "
-      //   + " }, "
-      //   + "logging: { "
-      //   + "console: { level: 'info', metric: false, audit: false }, "
-      //   + "auditLogger: { "
-      //   + "level: 'off', audit: true, handler: require('@flowforge/nr-audit-logger'), "
-      //   + "loggingURL: '" + options.auditURL + "', "
-      //   + "projectID: '" + id + "', "
-      //   + "token: '" + options.projectToken + "' "
-      //   + " }"
-      //   + "}, "
-      //   + "editorTheme: { page: {title: 'FlowForge'}, header: {title: 'FlowForge'} } "
-      //   + "}"
-
       return settings
     },
     /**
@@ -225,9 +203,9 @@ module.exports = {
         return {state: "okay"}
     },
     logs: async (project) => {
-        let result = await got.get("http://" project.id + ":2880/flowforge/logs").json()
+        let result = await got.get("http://" + project.id + ":2880/flowforge/logs").json()
         return result
-    }
+    },
     _createContainer: async (project, options, domain, image) => {
 
         let contOptions = {
@@ -285,6 +263,9 @@ module.exports = {
             .then(() => {
                 project.state = "running";
                 project.save();
+            })
+            .catch(err => {
+                console.log( err)
             });
 
             console.log("all good")
