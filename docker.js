@@ -1,3 +1,4 @@
+const got = require('got');
 const Docker = require('dockerode');
 
 /**
@@ -35,9 +36,14 @@ module.exports = {
             if (project) {
                 let container
                 try {
-                    container = await this._docker.getContainer(project.id)
+                    container = await this._docker.listContainers({filter: `name=${project.id}`})
+                    if (container[0]) {
+                      container = await this._docker.getContainer(container[0].Id)
+                    } else {
+                        container = undefined
+                    }
                 } catch (err) {
-
+                    console.log("Container not found")
                 }
                 if (container) {
                     let state = await container.inspect()
@@ -50,7 +56,7 @@ module.exports = {
                 } else {
                     //need to create
                     let name = project.name
-                    this._app.containers._createContainer(project.id,
+                    this._app.containers._createContainer(project,
                         {},//JSON.parse(project.options),
                         this._options.domain, 
                         this._options.containers[project.type]
@@ -68,11 +74,12 @@ module.exports = {
      * @return {forge.containers.Project}
      */
     create: async (project, options) => {
-        console.log("creating ", project.id)
+
         // console.log(options)
         // console.log("---")
 
-        return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[options.type])
+
+        return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
     },
     /**
      * Removes a Project
@@ -106,7 +113,7 @@ module.exports = {
             //console.log(container);
             let inspect = await container.inspect()
             return Promise.resolve({
-                id: id,
+                id: project.id,
                 state: inspect.State.Running ? "running" : "stopped",
                 meta: container
             })
@@ -203,8 +210,13 @@ module.exports = {
         return {state: "okay"}
     },
     logs: async (project) => {
-        let result = await got.get("http://" + project.id + ":2880/flowforge/logs").json()
-        return result
+        try {
+            let result = (await got.get("http://" + project.id + ":2880/flowforge/logs")).json()
+            return result
+        } catch (err) {
+            console.log(err)
+            return ""
+        }
     },
     _createContainer: async (project, options, domain, image) => {
 
@@ -241,7 +253,7 @@ module.exports = {
         contOptions.Env.push("FORGE_URL="+process.env["BASE_URL"]);
         contOptions.Env.push(`BASE_URL=${projectURL}`);
         //Only if we are using nginx ingress proxy
-        contOptions.Env.push(`VIRTUAL_HOST=${options.name}.${domain}`);
+        contOptions.Env.push(`VIRTUAL_HOST=${project.name}.${domain}`);
         contOptions.Env.push(`VIRTUAL_PORT=1880`);
         //httpStorage settings
         contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
@@ -253,12 +265,11 @@ module.exports = {
 
         try {
             let container = await this._docker.createContainer(contOptions);
-            // let project = await this._app.db.models.DockerProject.create({
-            //     id: id,
-            //     url: projectURL,
-            //     state: "starting",
-            //     options: options ? JSON.stringify(options) : '{}'
-            // })
+            
+
+            project.url = projectURL
+            project.save()
+
             container.start()
             .then(() => {
                 project.state = "running";
@@ -268,7 +279,7 @@ module.exports = {
                 console.log( err)
             });
 
-            console.log("all good")
+            // console.log("all good")
 
             return {
                 id: project.id, 
