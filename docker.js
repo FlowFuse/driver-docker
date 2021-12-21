@@ -211,7 +211,7 @@ module.exports = {
     },
     logs: async (project) => {
         try {
-            let result = (await got.get("http://" + project.id + ":2880/flowforge/logs")).json()
+            let result = await got.get("http://" + project.id + ":2880/flowforge/logs").json()
             return result
         } catch (err) {
             console.log(err)
