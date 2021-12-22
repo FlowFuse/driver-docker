@@ -6,8 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "ben@flowforge.com",
-  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flowforge/flowforge-driver-docker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/flowforge/flowforge-driver-docker/issues"
+  },
+  "homepage": "https://github.com/flowforge/flowforge-driver-docker#readme",
+  "author": {
+    "name": "FlowFlow Inc."
+  },
+  "license": "SEE LICENSE IN ./LICENSE",
   "dependencies": {
     "dockerode": "^3.3.1",
     "got": "^11.8.0"
