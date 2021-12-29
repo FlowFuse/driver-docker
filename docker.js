@@ -107,20 +107,29 @@ module.exports = {
      * @return {Object} 
      */
     details: async (project) => {
+        let infoURL = "http://"+ project.id + ":2880/flowforge/info"
         try {
-            // let forgeProject = await this._app.db.models.Project.byId(id);
-            let container = await this._docker.getContainer(project.id)//forgeProject.name);
-            //console.log(container);
-            let inspect = await container.inspect()
-            return Promise.resolve({
-                id: project.id,
-                state: inspect.State.Running ? "running" : "stopped",
-                meta: container
-            })
+          let info = JSON.parse((await got.get(infoURL)).body)
+          return info
         } catch (err) {
-            console.log(err)
-            return Promise.resolve({error: err})
+          //TODO
+          return
         }
+
+        // try {
+        //     // let forgeProject = await this._app.db.models.Project.byId(id);
+        //     let container = await this._docker.getContainer(project.id)//forgeProject.name);
+        //     //console.log(container);
+        //     let inspect = await container.inspect()
+        //     return Promise.resolve({
+        //         id: project.id,
+        //         state: inspect.State.Running ? "running" : "stopped",
+        //         meta: container
+        //     })
+        // } catch (err) {
+        //     console.log(err)
+        //     return Promise.resolve({error: err})
+        // }
     },
     /**
      * Returns the settings for the project
