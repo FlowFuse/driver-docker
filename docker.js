@@ -26,8 +26,6 @@ module.exports = {
         })
         this._options = options
 
-        // require('./models/Project')(app.db)
-
         // let projects = await this._app.db.models.DockerProject.findAll()
         let projects = await this._app.db.models.Project.findAll()
         projects.forEach(async (project) => {
