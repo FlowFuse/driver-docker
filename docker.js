@@ -257,7 +257,7 @@ module.exports = {
         contOptions.Env.push("FORGE_CLIENT_ID="+authTokens.clientID);
         contOptions.Env.push("FORGE_CLIENT_SECRET="+authTokens.clientSecret);
         //TODO this needs to come from a central point
-        contOptions.Env.push("FORGE_URL="+process.env["BASE_URL"]);
+        contOptions.Env.push("FORGE_URL="+process.env["API_URL"]);
         contOptions.Env.push(`BASE_URL=${projectURL}`);
         //Only if we are using nginx ingress proxy
         contOptions.Env.push(`VIRTUAL_HOST=${project.name}.${domain}`);
