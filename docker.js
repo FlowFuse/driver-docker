@@ -22,7 +22,7 @@ module.exports = {
     init: async (app, options) => {
         this._app = app
         this._docker = new Docker({
-            socketPath: process.env.DOCKER_SOCKET || '/var/run/docker.sock'
+            socketPath:  app.config.docker.socket || '/var/run/docker.sock' 
         })
         this._options = options
 
@@ -142,7 +142,7 @@ module.exports = {
       settings.rootDir = "/"
       settings.userDir = "data"
       settings.baseURL = project.url
-      settings.forgeURL = process.env["BASE_URL"]
+      settings.forgeURL = this._app.config.base_url 
 
       return settings
     },
@@ -257,7 +257,7 @@ module.exports = {
         contOptions.Env.push("FORGE_CLIENT_ID="+authTokens.clientID);
         contOptions.Env.push("FORGE_CLIENT_SECRET="+authTokens.clientSecret);
         //TODO this needs to come from a central point
-        contOptions.Env.push("FORGE_URL="+process.env["API_URL"]);
+        contOptions.Env.push("FORGE_URL="+this._app.config.api_url);
         contOptions.Env.push(`BASE_URL=${projectURL}`);
         //Only if we are using nginx ingress proxy
         contOptions.Env.push(`VIRTUAL_HOST=${project.name}.${domain}`);
@@ -265,11 +265,7 @@ module.exports = {
         //httpStorage settings
         contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
         contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
-        // contOptions.Env.push(`FORGE_STORAGE_URL=${options.storageURL}`)
-        // contOptions.Env.push(`FORGE_STORAGE_TOKEN=${options.projectToken || "ABCD"}`)
-        // contOptions.Env.push(`FORGE_AUDIT_URL=${process.env["BASE_URL"] + "/logging"}`);
-        // contOptions.Env.push(`FORGE_AUDIT_TOKEN=${options.projectToken || "ABCD"}`);
-
+        
         try {
             let container = await this._docker.createContainer(contOptions);
             
