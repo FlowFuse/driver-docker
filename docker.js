@@ -22,9 +22,13 @@ module.exports = {
     init: async (app, options) => {
         this._app = app
         this._docker = new Docker({
-            socketPath:  app.config.docker.socket || '/var/run/docker.sock' 
+            socketPath:  app.config.docker.options?.socket || '/var/run/docker.sock' 
         })
         this._options = options
+
+        if (! options.registry) {
+            options.registry = app.config.driver.options?.registry || "" //use docker hub
+        }
 
         // let projects = await this._app.db.models.DockerProject.findAll()
         let projects = await this._app.db.models.Project.findAll()
@@ -36,7 +40,7 @@ module.exports = {
                 try {
                     container = await this._docker.listContainers({filter: `name=${project.id}`})
                     if (container[0]) {
-                      container = await this._docker.getContainer(container[0].Id)
+                        container = await this._docker.getContainer(container[0].Id)
                     } else {
                         container = undefined
                     }
@@ -226,7 +230,9 @@ module.exports = {
         }
     },
     _createContainer: async (project, options, domain, image) => {
-
+        if (options.registry) {
+            image = options.registry + "/" + image
+        }
         let contOptions = {
             Image: image,
             name: project.id, //options.name,
