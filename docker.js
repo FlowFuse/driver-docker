@@ -230,6 +230,9 @@ module.exports = {
         }
     },
     _createContainer: async (project, options, domain, image) => {
+
+        let networks = await this._docker.listNetworks({filters:{label: ["com.docker.compose.network=flowforge"]}})
+
         if (options.registry) {
             image = options.registry + "/" + image
         }
@@ -242,7 +245,7 @@ module.exports = {
             AttachStdout: false,
             AttachStderr: false,
             HostConfig: {
-                NetworkMode: "internal"
+                NetworkMode: networks[0].Name
             }
         }
         if (options.env) {
