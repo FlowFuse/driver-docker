@@ -22,7 +22,7 @@ module.exports = {
     init: async (app, options) => {
         this._app = app
         this._docker = new Docker({
-            socketPath:  app.config.docker.options?.socket || '/var/run/docker.sock' 
+            socketPath:  app.config.driver.options?.socket || '/var/run/docker.sock' 
         })
         this._options = options
 
