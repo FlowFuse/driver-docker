@@ -253,7 +253,8 @@ module.exports = {
 
         // TODO http/https needs to be dynamic (or we just enforce https?)
         // and port number
-        const projectURL = `http://${project.name}.${this._options.domain}`
+        const baseURL = new URL(this._app.config.base_url)
+        const projectURL = `${baseURL.protocol}//${project.name}.${this._options.domain}`
 
         const authTokens = await project.refreshAuthTokens()
 
