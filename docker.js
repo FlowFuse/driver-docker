@@ -296,5 +296,11 @@ module.exports = {
             console.log('error:', err)
             return { error: err }
         }
+    },
+    /**
+     * Shutdown Driver
+     */
+    shutdown: async () => {
+
     }
 }
