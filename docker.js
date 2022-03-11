@@ -66,7 +66,28 @@ module.exports = {
             }
         })
 
-        return {}
+        return {
+            stack: {
+                properties: {
+                    cpu: {
+                        label: 'CPU Cores (%)',
+                        validate: '^[1-9][0-9]|100$',
+                        invalidMessage: 'Invalid value - must be a number between 1 and 100'
+                    },
+                    memory: {
+                        label: 'Memory (MB)',
+                        validate: '^[1-9]\\d*$',
+                        invalidMessage: 'Invalid value - must be a number'
+                    },
+                    container: {
+                        label: 'Container Location',
+                        // taken from https://stackoverflow.com/a/62964157
+                        validate: '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])(:[0-9]+\\/)?(?:[0-9a-z-]+[/@])(?:([0-9a-z-]+))[/@]?(?:([0-9a-z-]+))?(?::[a-z0-9\\.-]+)?$',
+                        invalidMessage: 'Invalid value - must be a Docker image'
+                    }
+                }
+            }
+        }
     },
     /**
      * Create a new Project
@@ -77,7 +98,8 @@ module.exports = {
     create: async (project, options) => {
         // console.log(options)
         // console.log("---")
-        return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
+        return await this._app.containers._createContainer(project, options, this._options.domain)
+        // return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
     },
     /**
      * Removes a Project
@@ -225,14 +247,15 @@ module.exports = {
             return ''
         }
     },
-    _createContainer: async (project, options, domain, image) => {
+    _createContainer: async (project, options, domain) => {
         const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
 
-        if (options.registry) {
-            image = options.registry + '/' + image
-        }
+        // if (options.registry) {
+        //     image = options.registry + '/' + image
+        // }
+        const stack = project.ProjectStack.properties
         const contOptions = {
-            Image: image,
+            Image: stack.container,
             name: project.id, // options.name,
             Env: [],
             Labels: {},
@@ -249,6 +272,15 @@ module.exports = {
                     contOptions.Env.push(k + '=' + options.env[k])
                 }
             })
+        }
+
+        if (project.ProjectStack) {
+            if (stack.cpu) {
+                contOptions.HostConfig.NanoCpus = (stack.cpu * (10^9))/100
+            }
+            if (project.stack.memory) {
+                contOptions.HostConfig.Memory = stack.memory
+            }
         }
 
         // TODO http/https needs to be dynamic (or we just enforce https?)
