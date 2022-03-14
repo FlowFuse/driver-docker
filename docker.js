@@ -1,6 +1,85 @@
 const got = require('got')
 const Docker = require('dockerode')
 
+const createContainer = async (project, options, domain) => {
+    const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
+    const stack = project.ProjectStack.properties
+    const contOptions = {
+        Image: stack.container,
+        name: project.id, // options.name,
+        Env: [],
+        Labels: {},
+        AttachStdin: false,
+        AttachStdout: false,
+        AttachStderr: false,
+        HostConfig: {
+            NetworkMode: networks[0].Name
+        }
+    }
+    if (options.env) {
+        Object.keys(options.env).forEach(k => {
+            if (k) {
+                contOptions.Env.push(k + '=' + options.env[k])
+            }
+        })
+    }
+
+    if (stack) {
+        if (stack.cpu) {
+            contOptions.HostConfig.NanoCpus = ((Number(stack.cpu)/100) * (10**9))
+        }
+        if (stack.memory) {
+            contOptions.HostConfig.Memory = Number(stack.memory) * (1024 * 1024)
+        }
+    }
+
+    // TODO http/https needs to be dynamic (or we just enforce https?)
+    // and port number
+    const baseURL = new URL(this._app.config.base_url)
+    const projectURL = `${baseURL.protocol}//${project.name}.${this._options.domain}`
+
+    const authTokens = await project.refreshAuthTokens()
+
+    // AuthProvider
+    contOptions.Env.push('FORGE_CLIENT_ID=' + authTokens.clientID)
+    contOptions.Env.push('FORGE_CLIENT_SECRET=' + authTokens.clientSecret)
+    // TODO this needs to come from a central point
+    contOptions.Env.push('FORGE_URL=' + this._app.config.api_url)
+    contOptions.Env.push(`BASE_URL=${projectURL}`)
+    // Only if we are using nginx ingress proxy
+    contOptions.Env.push(`VIRTUAL_HOST=${project.name}.${domain}`)
+    contOptions.Env.push('VIRTUAL_PORT=1880')
+    // httpStorage settings
+    contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
+    contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
+
+    try {
+        const container = await this._docker.createContainer(contOptions)
+
+        project.url = projectURL
+        project.save()
+
+        container.start()
+            .then(() => {
+                project.state = 'running'
+                project.save()
+            })
+            .catch(err => {
+                console.log(err)
+            })
+
+        return {
+            id: project.id,
+            status: 'okay',
+            url: projectURL,
+            meta: container
+        }
+    } catch (err) {
+        console.log('error:', err)
+        return { error: err }
+    }
+}
+
 /**
  * Docker Container driver
  *
@@ -31,21 +110,30 @@ module.exports = {
         }
 
         // let projects = await this._app.db.models.DockerProject.findAll()
-        const projects = await this._app.db.models.Project.findAll()
+        const projects = await this._app.db.models.Project.findAll({
+            include: [
+                {
+                    model: this._app.db.models.ProjectStack
+                }
+            ]
+        })
         projects.forEach(async (project) => {
             // const projectSettings = await project.getAllSettings();
             // let forgeProject = await this._app.db.models.Project.byId(project.id);
             if (project) {
                 let container
                 try {
-                    container = await this._docker.listContainers({ filter: `name=${project.id}` })
+                    container = await this._docker.listContainers({ 
+                        filters: {
+                            name: [ project.id ] 
+                        }
+                    })
                     if (container[0]) {
                         container = await this._docker.getContainer(container[0].Id)
                     } else {
                         container = undefined
                     }
                 } catch (err) {
-                    console.log('Container not found')
                 }
                 if (container) {
                     const state = await container.inspect()
@@ -57,7 +145,8 @@ module.exports = {
                     }
                 } else {
                     // need to create
-                    this._app.containers._createContainer(project,
+                    // this._app.containers._
+                    await createContainer(project,
                         {}, // JSON.parse(project.options),
                         this._options.domain,
                         this._options.containers[project.type]
@@ -66,7 +155,28 @@ module.exports = {
             }
         })
 
-        return {}
+        return {
+            stack: {
+                properties: {
+                    cpu: {
+                        label: 'CPU Cores (%)',
+                        validate: '^[1-9][0-9]|100$',
+                        invalidMessage: 'Invalid value - must be a number between 1 and 100'
+                    },
+                    memory: {
+                        label: 'Memory (MB)',
+                        validate: '^[1-9]\\d*$',
+                        invalidMessage: 'Invalid value - must be a number'
+                    },
+                    container: {
+                        label: 'Container Location',
+                        // taken from https://stackoverflow.com/a/62964157
+                        validate: '^(([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])\\.)*([a-z0-9]|[a-z0-9][a-z0-9\\-]*[a-z0-9])(:[0-9]+\\/)?(?:[0-9a-z-]+[/@])(?:([0-9a-z-]+))[/@]?(?:([0-9a-z-]+))?(?::[a-z0-9\\.-]+)?$',
+                        invalidMessage: 'Invalid value - must be a Docker image'
+                    }
+                }
+            }
+        }
     },
     /**
      * Create a new Project
@@ -77,7 +187,9 @@ module.exports = {
     create: async (project, options) => {
         // console.log(options)
         // console.log("---")
-        return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
+        // return await this._app.containers._driver._
+        return await createContainer(project, options, this._options.domain)
+        // return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
     },
     /**
      * Removes a Project
@@ -85,7 +197,6 @@ module.exports = {
      * @return {Object}
      */
     remove: async (project) => {
-        console.log('removing ', project.id)
         try {
             // let forgeProject = await this._app.db.models.Project.byId(id);
             const container = await this._docker.getContainer(project.id)
@@ -223,78 +334,6 @@ module.exports = {
         } catch (err) {
             console.log(err)
             return ''
-        }
-    },
-    _createContainer: async (project, options, domain, image) => {
-        const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
-
-        if (options.registry) {
-            image = options.registry + '/' + image
-        }
-        const contOptions = {
-            Image: image,
-            name: project.id, // options.name,
-            Env: [],
-            Labels: {},
-            AttachStdin: false,
-            AttachStdout: false,
-            AttachStderr: false,
-            HostConfig: {
-                NetworkMode: networks[0].Name
-            }
-        }
-        if (options.env) {
-            Object.keys(options.env).forEach(k => {
-                if (k) {
-                    contOptions.Env.push(k + '=' + options.env[k])
-                }
-            })
-        }
-
-        // TODO http/https needs to be dynamic (or we just enforce https?)
-        // and port number
-        const baseURL = new URL(this._app.config.base_url)
-        const projectURL = `${baseURL.protocol}//${project.name}.${this._options.domain}`
-
-        const authTokens = await project.refreshAuthTokens()
-
-        // AuthProvider
-        contOptions.Env.push('FORGE_CLIENT_ID=' + authTokens.clientID)
-        contOptions.Env.push('FORGE_CLIENT_SECRET=' + authTokens.clientSecret)
-        // TODO this needs to come from a central point
-        contOptions.Env.push('FORGE_URL=' + this._app.config.api_url)
-        contOptions.Env.push(`BASE_URL=${projectURL}`)
-        // Only if we are using nginx ingress proxy
-        contOptions.Env.push(`VIRTUAL_HOST=${project.name}.${domain}`)
-        contOptions.Env.push('VIRTUAL_PORT=1880')
-        // httpStorage settings
-        contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
-        contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
-
-        try {
-            const container = await this._docker.createContainer(contOptions)
-
-            project.url = projectURL
-            project.save()
-
-            container.start()
-                .then(() => {
-                    project.state = 'running'
-                    project.save()
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-
-            return {
-                id: project.id,
-                status: 'okay',
-                url: projectURL,
-                meta: container
-            }
-        } catch (err) {
-            console.log('error:', err)
-            return { error: err }
         }
     },
     /**
