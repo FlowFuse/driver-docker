@@ -252,8 +252,6 @@ module.exports = {
         settings.port = 1880
         settings.rootDir = '/'
         settings.userDir = 'data'
-        settings.baseURL = project.url
-        settings.forgeURL = this._app.config.base_url
 
         return settings
     },
