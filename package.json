@@ -1,31 +1,31 @@
 {
-  "name": "@flowforge/docker",
-  "version": "0.2.0",
-  "description": "Docker driver for FlowForge",
-  "main": "docker.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint -c .eslintrc",
-    "lint:fix": "eslint -c .eslintrc --fix"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/flowforge/flowforge-driver-docker.git"
-  },
-  "bugs": {
-    "url": "https://github.com/flowforge/flowforge-driver-docker/issues"
-  },
-  "homepage": "https://github.com/flowforge/flowforge-driver-docker#readme",
-  "author": {
-    "name": "FlowFlow Inc."
-  },
-  "license": "Apache-2.0",
-  "dependencies": {
-    "dockerode": "^3.3.1",
-    "got": "^11.8.0"
-  },
-  "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-standard": "^16.0.3"
-  }
+    "name": "@flowforge/docker",
+    "version": "0.3.0",
+    "description": "Docker driver for FlowForge",
+    "main": "docker.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "eslint -c .eslintrc",
+        "lint:fix": "eslint -c .eslintrc --fix"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/flowforge/flowforge-driver-docker.git"
+    },
+    "bugs": {
+        "url": "https://github.com/flowforge/flowforge-driver-docker/issues"
+    },
+    "homepage": "https://github.com/flowforge/flowforge-driver-docker#readme",
+    "author": {
+        "name": "FlowFlow Inc."
+    },
+    "license": "Apache-2.0",
+    "dependencies": {
+        "dockerode": "^3.3.1",
+        "got": "^11.8.0"
+    },
+    "devDependencies": {
+        "eslint": "^7.32.0",
+        "eslint-config-standard": "^16.0.3"
+    }
 }
