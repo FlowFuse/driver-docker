@@ -1,7 +1,7 @@
 const got = require('got')
 const Docker = require('dockerode')
 
-const createContainer = async (project, options, domain) => {
+const createContainer = async (project, domain) => {
     const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
     const stack = project.ProjectStack.properties
     const contOptions = {
@@ -16,17 +16,10 @@ const createContainer = async (project, options, domain) => {
             NetworkMode: networks[0].Name
         }
     }
-    if (options.env) {
-        Object.keys(options.env).forEach(k => {
-            if (k) {
-                contOptions.Env.push(k + '=' + options.env[k])
-            }
-        })
-    }
 
     if (stack) {
         if (stack.cpu) {
-            contOptions.HostConfig.NanoCpus = ((Number(stack.cpu)/100) * (10**9))
+            contOptions.HostConfig.NanoCpus = ((Number(stack.cpu) / 100) * (10 ** 9))
         }
         if (stack.memory) {
             contOptions.HostConfig.Memory = Number(stack.memory) * (1024 * 1024)
@@ -53,31 +46,18 @@ const createContainer = async (project, options, domain) => {
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
 
-    try {
-        const container = await this._docker.createContainer(contOptions)
-
-        project.url = projectURL
-        project.save()
-
-        container.start()
-            .then(() => {
-                project.state = 'running'
-                project.save()
-            })
-            .catch(err => {
-                console.log(err)
-            })
-
-        return {
-            id: project.id,
-            status: 'okay',
-            url: projectURL,
-            meta: container
-        }
-    } catch (err) {
-        console.log('error:', err)
-        return { error: err }
-    }
+    const container = await this._docker.createContainer(contOptions)
+    return container.start()
+        .then(() => {
+            this._app.log.debug(`Container ${project.id} started [${container.id.substring(0, 12)}]`)
+            project.url = projectURL
+            project.state = 'running'
+            project.save()
+            setTimeout(() => {
+                // Give the container a few seconds to get the launcher process started
+                this._projects[project.id].state = 'started'
+            }, 4000)
+        })
 }
 
 /**
@@ -100,6 +80,7 @@ module.exports = {
      */
     init: async (app, options) => {
         this._app = app
+        this._projects = {}
         this._docker = new Docker({
             socketPath: app.config.driver.options?.socket || '/var/run/docker.sock'
         })
@@ -109,51 +90,70 @@ module.exports = {
             options.registry = app.config.driver.options?.registry || '' // use docker hub
         }
 
-        // let projects = await this._app.db.models.DockerProject.findAll()
-        const projects = await this._app.db.models.Project.findAll({
-            include: [
-                {
-                    model: this._app.db.models.ProjectStack
-                }
+        // Get a list of all projects - with the absolute minimum of fields returned
+        const projects = await app.db.models.Project.findAll({
+            attributes: [
+                'id',
+                'state',
+                'ProjectStackId'
             ]
         })
         projects.forEach(async (project) => {
-            // const projectSettings = await project.getAllSettings();
-            // let forgeProject = await this._app.db.models.Project.byId(project.id);
-            if (project) {
-                let container
-                try {
-                    container = await this._docker.listContainers({ 
-                        filters: {
-                            name: [ project.id ] 
-                        }
-                    })
-                    if (container[0]) {
-                        container = await this._docker.getContainer(container[0].Id)
-                    } else {
-                        container = undefined
-                    }
-                } catch (err) {
-                }
-                if (container) {
-                    const state = await container.inspect()
-                    if (!state.State.Running) {
-                        if (project.state === 'running') {
-                            // need to restart existing container
-                            container.start()
-                        }
-                    }
-                } else {
-                    // need to create
-                    // this._app.containers._
-                    await createContainer(project,
-                        {}, // JSON.parse(project.options),
-                        this._options.domain,
-                        this._options.containers[project.type]
-                    )
+            if (this._projects[project.id] === undefined) {
+                this._projects[project.id] = {
+                    state: 'unknown'
                 }
             }
         })
+
+        this._initialCheckTimeout = setTimeout(() => {
+            this._app.log.debug('[docker] Restarting projects')
+            projects.forEach(async (project) => {
+                try {
+                    if (project.state === 'suspended') {
+                        // Do not restart suspended projects
+                        return
+                    }
+                    let container
+                    try {
+                        container = await this._docker.listContainers({
+                            all: true,
+                            filters: {
+                                name: [project.id]
+                            }
+                        })
+                        if (container[0]) {
+                            container = await this._docker.getContainer(container[0].Id)
+                        } else {
+                            container = undefined
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    if (container) {
+                        const state = await container.inspect()
+                        if (!state.State.Running) {
+                            this._projects[project.id].state = 'starting'
+                            this._app.log.debug(`[docker] Project ${project.id} - restarting container [${container.id.substring(0, 12)}]`)
+                            // need to restart existing container
+                            container.start().then(() => {
+                                this._projects[project.id].state = 'started'
+                            })
+                        } else {
+                            this._app.log.debug(`[docker] Project ${project.id} - already running container [${container.id.substring(0, 12)}]`)
+                            this._projects[project.id].state = 'started'
+                        }
+                    } else {
+                        this._app.log.debug(`[docker] Project ${project.id} - recreating container`)
+                        const fullProject = await this._app.db.models.Project.byId(project.id)
+                        // need to create
+                        await createContainer(fullProject, this._options.domain)
+                    }
+                } catch (err) {
+                    this._app.log.error(`[docker] Project ${project.id} - error resuming project: ${err.stack}`)
+                }
+            })
+        }, 1000)
 
         return {
             stack: {
@@ -179,17 +179,33 @@ module.exports = {
         }
     },
     /**
-     * Create a new Project
-     * @param {string} id - id for the project
-     * @param {forge.containers.Options} options - options for the project
+     * Start a Project
+     * @param {*}  - id for the project
      * @return {forge.containers.Project}
      */
-    create: async (project, options) => {
-        // console.log(options)
-        // console.log("---")
-        // return await this._app.containers._driver._
-        return await createContainer(project, options, this._options.domain)
-        // return await this._app.containers._createContainer(project, options, this._options.domain, this._options.containers[project.type])
+    start: async (project) => {
+        this._projects[project.id] = {
+            state: 'starting'
+        }
+        const rs = createContainer(project, this._options.domain)
+        return rs
+    },
+    /**
+     * Stops the container and removes it
+     * @param {*} project
+     */
+    stop: async (project) => {
+        // There is no difference in docker between suspending and stopping the container
+        // as we have no additional state to maintain
+        const container = await this._docker.getContainer(project.id)
+        this._projects[project.id].state = 'suspended'
+        await container.stop()
+
+        // We remove the container even though this is only a stop, so that a
+        // restart can rebuild with a different container image if needed.
+        // An alternative would be to spot the required image had changed on
+        // start, and do the remove/create/start at that point in time.
+        await container.remove()
     },
     /**
      * Removes a Project
@@ -197,18 +213,10 @@ module.exports = {
      * @return {Object}
      */
     remove: async (project) => {
-        try {
-            // let forgeProject = await this._app.db.models.Project.byId(id);
-            const container = await this._docker.getContainer(project.id)
-            await container.stop()
-            await container.remove()
-            // let project = await this._app.db.models.DockerProject.byId(id)
-            // await project.destroy()
-            return { status: 'okay' }
-        } catch (err) {
-            console.log(err)
-            return { error: err }
-        }
+        const container = await this._docker.getContainer(project.id)
+        await container.stop()
+        await container.remove()
+        delete this._projects[project.id]
     },
     /**
      * Retrieves details of a project's container
@@ -216,6 +224,13 @@ module.exports = {
      * @return {Object}
      */
     details: async (project) => {
+        if (this._projects[project.id].state !== 'started') {
+            // We should only poll the launcher if we think it is running.
+            // Otherwise, return our cached state
+            return {
+                state: this._projects[project.id].state
+            }
+        }
         const infoURL = 'http://' + project.id + ':2880/flowforge/info'
         try {
             const info = JSON.parse((await got.get(infoURL)).body)
@@ -224,21 +239,6 @@ module.exports = {
             // TODO
             // return
         }
-
-        // try {
-        //     // let forgeProject = await this._app.db.models.Project.byId(id);
-        //     let container = await this._docker.getContainer(project.id)//forgeProject.name);
-        //     //console.log(container);
-        //     let inspect = await container.inspect()
-        //     return Promise.resolve({
-        //         id: project.id,
-        //         state: inspect.State.Running ? "running" : "stopped",
-        //         meta: container
-        //     })
-        // } catch (err) {
-        //     console.log(err)
-        //     return Promise.resolve({error: err})
-        // }
     },
     /**
      * Returns the settings for the project
@@ -256,83 +256,43 @@ module.exports = {
         return settings
     },
     /**
-     * Lists all containers
-     * @param {string} filter - rules to filter the containers
-     * @return {Object}
-     */
-    list: async (filter) => {
-        const containers = await this._docker.listContainers({ all: true })
-        // console.log(containers)
-        return containers.map(c => { return c.Names[0].substring(1) })
-    },
-    /**
-     * Starts a Project's container
+     * Starts the flows
      * @param {string} id - id of project to start
      * @return {forge.Status}
      */
-    start: async (project) => {
-        // try {
-        //     let container = await this._docker.getContainer(project.id);
-        //     container.start()
-        // } catch (err) {
-
-        // }
-
+    startFlows: async (project) => {
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'start'
             }
         })
-
-        project.state = 'starting'
-        project.save()
-
-        return { status: 'okey' }
     },
     /**
-     * Stops a Proejct's container
+     * Stops the flows
      * @param {string} id - id of project to stop
      * @return {forge.Status}
      */
-    stop: async (project) => {
-        // try {
-        //     let container = await this._docker.getContainer(project.id);
-        //     container.stop()
-        // } catch (err) {
-
-        // }
-
+    stopFlows: async (project) => {
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'stop'
             }
         })
-        project.state = 'stopped'
-        project.save()
-        return Promise.resolve({ status: 'okay' })
     },
     /**
-     * Restarts a Project's container
+     * Restarts the flows
      * @param {string} id - id of project to restart
      * @return {forge.Status}
      */
-    restart: async (project) => {
+    restartFlows: async (project) => {
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'restart'
             }
         })
-
-        return { state: 'okay' }
     },
     logs: async (project) => {
-        try {
-            const result = await got.get('http://' + project.id + ':2880/flowforge/logs').json()
-            return result
-        } catch (err) {
-            console.log(err)
-            return ''
-        }
+        return await got.get('http://' + project.id + ':2880/flowforge/logs').json()
     },
     /**
      * Shutdown Driver
