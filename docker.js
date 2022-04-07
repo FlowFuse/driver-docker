@@ -298,6 +298,6 @@ module.exports = {
      * Shutdown Driver
      */
     shutdown: async () => {
-
+        clearTimeout(this._initialCheckTimeout)
     }
 }
