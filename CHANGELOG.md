@@ -1,5 +1,8 @@
 #### 0.4.0: Release
 
+ - Update to use new container driver API (#17) @knolleary
+ - Fix validator regex for CPU % (#16) @hardillb
+ - Update project automation (#18) @knolleary
 
 #### 0.3.0: Release
 
