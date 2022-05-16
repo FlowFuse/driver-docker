@@ -160,7 +160,7 @@ module.exports = {
                 properties: {
                     cpu: {
                         label: 'CPU Cores (%)',
-                        validate: '^([1-9][0-9]|100)$',
+                        validate: '^([1-9][0-9]?|100)$',
                         invalidMessage: 'Invalid value - must be a number between 1 and 100',
                         description: 'How much of a single CPU core each Project should receive'
                     },
