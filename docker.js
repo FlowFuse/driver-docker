@@ -168,7 +168,7 @@ module.exports = {
                         label: 'Memory (MB)',
                         validate: '^[1-9]\\d+$',
                         invalidMessage: 'Invalid value - must be a number',
-                        description: 'How much memory the container for each Project will be granted, recomended value 256'
+                        description: 'How much memory the container for each Project will be granted, recommended value 256'
                     },
                     container: {
                         label: 'Container Location',
