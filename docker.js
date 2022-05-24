@@ -46,6 +46,11 @@ const createContainer = async (project, domain) => {
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
 
+    const credentialSecret = await project.getSetting('credentialSecret')
+    if (credentialSecret) {
+        contOptions.Env.push(`FORGE_NR_SECRET=${credentialSecret}`)
+    }
+
     const container = await this._docker.createContainer(contOptions)
     return container.start()
         .then(() => {
