@@ -232,6 +232,9 @@ module.exports = {
      * @return {Object}
      */
     details: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
         if (this._projects[project.id].state !== 'started') {
             // We should only poll the launcher if we think it is running.
             // Otherwise, return our cached state
@@ -269,6 +272,9 @@ module.exports = {
      * @return {forge.Status}
      */
     startFlows: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'start'
@@ -281,6 +287,9 @@ module.exports = {
      * @return {forge.Status}
      */
     stopFlows: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'stop'
@@ -293,6 +302,9 @@ module.exports = {
      * @return {forge.Status}
      */
     restartFlows: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
         await got.post('http://' + project.id + ':2880/flowforge/command', {
             json: {
                 cmd: 'restart'
@@ -300,6 +312,9 @@ module.exports = {
         })
     },
     logs: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
         return await got.get('http://' + project.id + ':2880/flowforge/logs').json()
     },
     /**
