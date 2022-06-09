@@ -1,3 +1,10 @@
+#### 0.6.0: Release
+
+ - Map FlowForge logout to nodered auth/revoke (#24) @Steve-Mcl
+ - Throw proper errors when actions performed on unknown project (#25) @knolleary
+ - Add FORGE_NR_SECRET env if project has credSecret set (#23) @knolleary
+ - Add Stack Properties descriptions (#21) @hardillb
+
 #### 0.5.0: Release
 
 #### 0.4.0: Release
