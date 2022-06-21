@@ -45,6 +45,11 @@ const createContainer = async (project, domain) => {
     // httpStorage settings
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
+    // broker settings
+    if (authTokens.broker) {
+        contOptions.Env.push(`FORGE_BROKER_USERNAME=${authTokens.broker.username}`)
+        contOptions.Env.push(`FORGE_BROKER_PASSWORD=${authTokens.broker.password}`)
+    }
 
     const credentialSecret = await project.getSetting('credentialSecret')
     if (credentialSecret) {
