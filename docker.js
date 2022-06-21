@@ -319,7 +319,7 @@ module.exports = {
    */
     revokeUserToken: async (project, token) => { // logout:nodered(step-3)
         try {
-            this._app.log.debug(`[docker] Project ${project.id} - logging out node-red instance [${container.id.substring(0, 12)}]`)
+            this._app.log.debug(`[docker] Project ${project.id} - logging out node-red instance`)
             await got.post('http://' + project.id + ':2880/flowforge/command', { // logout:nodered(step-4)
                 json: {
                     cmd: 'logout',
