@@ -1,3 +1,7 @@
+#### 0.7.0: Release
+
+ - Fix log call when revoking Node-RED sessions (#29) @knolleary
+
 #### 0.6.0: Release
 
  - Map FlowForge logout to nodered auth/revoke (#24) @Steve-Mcl
