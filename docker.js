@@ -8,7 +8,9 @@ const createContainer = async (project, domain) => {
         Image: stack.container,
         name: project.id, // options.name,
         Env: [],
-        Labels: {},
+        Labels: {
+            flowforge: 'project'
+        },
         AttachStdin: false,
         AttachStdout: false,
         AttachStderr: false,
@@ -58,10 +60,7 @@ const createContainer = async (project, domain) => {
             project.url = projectURL
             project.state = 'running'
             project.save()
-            setTimeout(() => {
-                // Give the container a few seconds to get the launcher process started
-                this._projects[project.id].state = 'started'
-            }, 4000)
+            this._projects[project.id].state = 'starting'
         })
 }
 
@@ -235,21 +234,66 @@ module.exports = {
         if (this._projects[project.id] === undefined) {
             return { state: 'unknown' }
         }
-        if (this._projects[project.id].state !== 'started') {
+        if (this._projects[project.id].state === 'suspended') {
             // We should only poll the launcher if we think it is running.
             // Otherwise, return our cached state
             return {
                 state: this._projects[project.id].state
             }
         }
-        const infoURL = 'http://' + project.id + ':2880/flowforge/info'
-        try {
-            const info = JSON.parse((await got.get(infoURL)).body)
-            return info
-        } catch (err) {
-            // TODO
-            // return
+        const containers = await this._docker.listContainers({})
+        var found = false
+        var response
+        containers.forEach(async container => {
+            if (container.Names[0] === project.id) {
+                found = true
+                const infoURL = 'http://' + project.id + ':2880/flowforge/info'
+                try {
+                    response = JSON.parse((await got.get(infoURL,{
+                        timeout: {
+                            request: 500
+                        }
+                    })).body)
+                    // var body = await got.get(infoURL, {
+                    //     timeout: {
+                    //         request: 500
+                    //     }
+                    // })
+                    // response = JSON.parse(body)
+                    this._projects[project.id].state = 'running'
+                } catch (err) {
+                    response = {
+                        id: project.id,
+                        state: 'starting'
+                    }
+                }
+            }
+        })
+        if (found) {
+            return response
+        } else {
+            response = {
+                id: project.id,
+                state: 'starting'
+            }
         }
+        // const infoURL = 'http://' + project.id + ':2880/flowforge/info'
+        // try {
+        //     const info = JSON.parse((await got.get(infoURL),{
+        //         timeout: {
+        //             request: 500
+        //         }
+        //     }).body)
+        //     this._projects[project.id].state = 'running'
+        //     return info
+        // } catch (err) {
+        //     // TODO
+        //     // return
+        //     return {
+        //         id: project.id,
+        //         state: 'starting'
+        //     }
+        // }
     },
     /**
      * Returns the settings for the project
