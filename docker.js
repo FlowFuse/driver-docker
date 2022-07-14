@@ -55,11 +55,11 @@ const createContainer = async (project, domain) => {
 
     const container = await this._docker.createContainer(contOptions)
     return container.start()
-        .then(() => {
+        .then(async () => {
             this._app.log.debug(`Container ${project.id} started [${container.id.substring(0, 12)}]`)
             project.url = projectURL
             project.state = 'running'
-            project.save()
+            await project.save()
             this._projects[project.id].state = 'starting'
         })
 }
@@ -242,39 +242,37 @@ module.exports = {
             }
         }
         const containers = await this._docker.listContainers({})
-        var found = false
-        var response
-        containers.forEach(async container => {
-            if (container.Names[0] === project.id) {
+        let found = false
+        let response
+        for (let index = 0; index < containers.length; index++) {
+            const container = containers[index]
+            if (container.Names[0].endsWith(project.id)) {
                 found = true
                 const infoURL = 'http://' + project.id + ':2880/flowforge/info'
                 try {
-                    response = JSON.parse((await got.get(infoURL,{
+                    response = await got.get(infoURL, {
                         timeout: {
                             request: 500
                         }
-                    })).body)
-                    // var body = await got.get(infoURL, {
-                    //     timeout: {
-                    //         request: 500
-                    //     }
-                    // })
-                    // response = JSON.parse(body)
+                    }).json()
                     this._projects[project.id].state = 'running'
+                    break
                 } catch (err) {
                     response = {
                         id: project.id,
-                        state: 'starting'
+                        state: 'starting',
+                        meta: {}
                     }
                 }
             }
-        })
+        }
         if (found) {
             return response
         } else {
-            response = {
+            return {
                 id: project.id,
-                state: 'starting'
+                state: 'starting',
+                meta: {}
             }
         }
         // const infoURL = 'http://' + project.id + ':2880/flowforge/info'
