@@ -30,7 +30,7 @@ const createContainer = async (project, domain) => {
     // and port number
     const baseURL = new URL(this._app.config.base_url)
     const projectURL = `${baseURL.protocol}//${project.name}.${this._options.domain}`
-
+    const teamID = this._app.db.models.Team.encodeHashid(project.TeamId)
     const authTokens = await project.refreshAuthTokens()
 
     // AuthProvider
@@ -45,6 +45,8 @@ const createContainer = async (project, domain) => {
     // httpStorage settings
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
+    // common
+    contOptions.Env.push(`FORGE_TEAM_ID=${teamID}`)
 
     const credentialSecret = await project.getSetting('credentialSecret')
     if (credentialSecret) {
@@ -100,7 +102,8 @@ module.exports = {
             attributes: [
                 'id',
                 'state',
-                'ProjectStackId'
+                'ProjectStackId',
+                'TeamId'
             ]
         })
         projects.forEach(async (project) => {
