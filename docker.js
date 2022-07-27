@@ -8,7 +8,9 @@ const createContainer = async (project, domain) => {
         Image: stack.container,
         name: project.id, // options.name,
         Env: [],
-        Labels: {},
+        Labels: {
+            flowforge: 'project'
+        },
         AttachStdin: false,
         AttachStdout: false,
         AttachStderr: false,
@@ -59,15 +61,12 @@ const createContainer = async (project, domain) => {
 
     const container = await this._docker.createContainer(contOptions)
     return container.start()
-        .then(() => {
+        .then(async () => {
             this._app.log.debug(`Container ${project.id} started [${container.id.substring(0, 12)}]`)
             project.url = projectURL
             project.state = 'running'
-            project.save()
-            setTimeout(() => {
-                // Give the container a few seconds to get the launcher process started
-                this._projects[project.id].state = 'started'
-            }, 4000)
+            await project.save()
+            this._projects[project.id].state = 'starting'
         })
 }
 
@@ -241,21 +240,64 @@ module.exports = {
         if (this._projects[project.id] === undefined) {
             return { state: 'unknown' }
         }
-        if (this._projects[project.id].state !== 'started') {
+        if (this._projects[project.id].state === 'suspended') {
             // We should only poll the launcher if we think it is running.
             // Otherwise, return our cached state
             return {
                 state: this._projects[project.id].state
             }
         }
-        const infoURL = 'http://' + project.id + ':2880/flowforge/info'
-        try {
-            const info = JSON.parse((await got.get(infoURL)).body)
-            return info
-        } catch (err) {
-            // TODO
-            // return
+        const containers = await this._docker.listContainers({})
+        let found = false
+        let response
+        for (let index = 0; index < containers.length; index++) {
+            const container = containers[index]
+            if (container.Names[0].endsWith(project.id)) {
+                found = true
+                const infoURL = 'http://' + project.id + ':2880/flowforge/info'
+                try {
+                    response = await got.get(infoURL, {
+                        timeout: {
+                            request: 500
+                        }
+                    }).json()
+                    this._projects[project.id].state = 'running'
+                    break
+                } catch (err) {
+                    response = {
+                        id: project.id,
+                        state: 'starting',
+                        meta: {}
+                    }
+                }
+            }
         }
+        if (found) {
+            return response
+        } else {
+            return {
+                id: project.id,
+                state: 'starting',
+                meta: {}
+            }
+        }
+        // const infoURL = 'http://' + project.id + ':2880/flowforge/info'
+        // try {
+        //     const info = JSON.parse((await got.get(infoURL),{
+        //         timeout: {
+        //             request: 500
+        //         }
+        //     }).body)
+        //     this._projects[project.id].state = 'running'
+        //     return info
+        // } catch (err) {
+        //     // TODO
+        //     // return
+        //     return {
+        //         id: project.id,
+        //         state: 'starting'
+        //     }
+        // }
     },
     /**
      * Returns the settings for the project
