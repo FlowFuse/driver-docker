@@ -47,6 +47,7 @@ const createContainer = async (project, domain) => {
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
     // broker settings
     if (authTokens.broker) {
+        contOptions.Env.push(`FORGE_BROKER_URL=${authTokens.broker.url}`)
         contOptions.Env.push(`FORGE_BROKER_USERNAME=${authTokens.broker.username}`)
         contOptions.Env.push(`FORGE_BROKER_PASSWORD=${authTokens.broker.password}`)
     }
