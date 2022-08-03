@@ -55,6 +55,9 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push(`FORGE_BROKER_USERNAME=${authTokens.broker.username}`)
         contOptions.Env.push(`FORGE_BROKER_PASSWORD=${authTokens.broker.password}`)
     }
+    if (this._app.license.active()) {
+        contOptions.Env.push('FORGE_LICENSE_TYPE=ee')
+    }
 
     const credentialSecret = await project.getSetting('credentialSecret')
     if (credentialSecret) {
