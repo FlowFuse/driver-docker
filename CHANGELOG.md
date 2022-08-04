@@ -1,3 +1,10 @@
+#### 0.8.0: Release
+
+ - Add licenseType to launcher env (#34) @knolleary
+ - add env var FORGE_TEAM_ID (#33) @Steve-Mcl
+ - Better start up exp 586 (#32) @hardillb
+ - Add FORGE_BROKER_* credentials to launcher env (#30) @knolleary
+
 #### 0.7.0: Release
 
  - Fix log call when revoking Node-RED sessions (#29) @knolleary
