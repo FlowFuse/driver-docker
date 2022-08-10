@@ -253,7 +253,6 @@ module.exports = {
                 state: this._projects[project.id].state
             }
         }
-<<<<<<< HEAD
         const containers = await this._docker.listContainers({})
         let found = false
         let response
@@ -268,6 +267,12 @@ module.exports = {
                             request: 500
                         }
                     }).json()
+                    const container = await this._docker.getContainer(project.id)
+                    const stats = await container.stats({stream: false})
+                    response.memory = {
+                        used: stats.memory_stats.usage,
+                        limit: stats.memory_stats.limit
+                    }
                     this._projects[project.id].state = 'running'
                     break
                 } catch (err) {
@@ -278,21 +283,6 @@ module.exports = {
                     }
                 }
             }
-=======
-        const infoURL = 'http://' + project.id + ':2880/flowforge/info'
-        try {
-            const info = JSON.parse((await got.get(infoURL)).body)
-            const container = await this._docker.getContainer(project.id)
-            const stats = await container.stats({ stream: false })
-            info.memory = {
-                used: stats.memory_stats.usage,
-                limit: stats.memory_stats.limit
-            }
-            return info
-        } catch (err) {
-            // TODO
-            // return
->>>>>>> 3b66429 (First pass at gathering memory usage stats)
         }
         if (found) {
             return response
