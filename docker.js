@@ -283,7 +283,7 @@ module.exports = {
         try {
             const info = JSON.parse((await got.get(infoURL)).body)
             const container = await this._docker.getContainer(project.id)
-            const stats = await container.stats({stream: false})
+            const stats = await container.stats({ stream: false })
             info.memory = {
                 used: stats.memory_stats.usage,
                 limit: stats.memory_stats.limit
