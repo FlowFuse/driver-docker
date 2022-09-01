@@ -1,3 +1,7 @@
+#### 0.9.0: Release
+
+ - Use project.safeName (#37) @hardillb
+
 #### 0.8.0: Release
 
  - Add licenseType to launcher env (#34) @knolleary
