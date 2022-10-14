@@ -43,6 +43,9 @@ const createContainer = async (project, domain) => {
     contOptions.Env.push(`BASE_URL=${projectURL}`)
     // Only if we are using nginx ingress proxy
     contOptions.Env.push(`VIRTUAL_HOST=${project.safeName}.${domain}`)
+    if (baseURL.protocol === 'https:') {
+        contOptions.Env.push(`LETSENCRYPT_HOST=${project.safeName}.${domain}`)
+    }
     contOptions.Env.push('VIRTUAL_PORT=1880')
     // httpStorage settings
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
