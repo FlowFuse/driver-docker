@@ -5,8 +5,8 @@
     "main": "docker.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "lint": "eslint -c .eslintrc",
-        "lint:fix": "eslint -c .eslintrc --fix"
+        "lint": "eslint -c .eslintrc *.js",
+        "lint:fix": "eslint -c .eslintrc *.js --fix"
     },
     "repository": {
         "type": "git",
@@ -25,7 +25,7 @@
         "got": "^11.8.0"
     },
     "devDependencies": {
-        "eslint": "^7.32.0",
-        "eslint-config-standard": "^16.0.3"
+        "eslint": "^8.25.0",
+        "eslint-config-standard": "^17.0.0"
     }
 }

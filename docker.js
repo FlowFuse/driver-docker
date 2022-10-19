@@ -380,7 +380,7 @@ module.exports = {
             await got.post('http://' + project.id + ':2880/flowforge/command', { // logout:nodered(step-4)
                 json: {
                     cmd: 'logout',
-                    token: token
+                    token
                 }
             })
         } catch (error) {
