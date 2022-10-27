@@ -1,3 +1,8 @@
+#### 1.0.0: Release
+
+ - Add LetsEncypt env var if https enabled
+ - Update eslint (#42) @knolleary
+
 #### 0.10.0: Release
 
 
