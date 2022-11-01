@@ -50,6 +50,9 @@ const createContainer = async (project, domain) => {
     // httpStorage settings
     contOptions.Env.push(`FORGE_PROJECT_ID=${project.id}`)
     contOptions.Env.push(`FORGE_PROJECT_TOKEN=${authTokens.token}`)
+    // Inbound connections for docker disabled by default
+    contOptions.Env.push('FORGE_NR_NO_TCP_IN=true') // MVP. Future iteration could present this to YML or UI
+    contOptions.Env.push('FORGE_NR_NO_UDP_IN=true') // MVP. Future iteration could present this to YML or UI
     // common
     contOptions.Env.push(`FORGE_TEAM_ID=${teamID}`)
     // broker settings
