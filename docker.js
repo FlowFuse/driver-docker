@@ -237,7 +237,11 @@ module.exports = {
     remove: async (project) => {
         const container = await this._docker.getContainer(project.id)
         await container.stop()
-        await container.remove()
+        if (this._projects[project.id].state !== 'suspended') {
+            try {
+                await container.remove()
+            } catch (err) {}
+        }
         delete this._projects[project.id]
     },
     /**
