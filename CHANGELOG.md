@@ -1,3 +1,9 @@
+#### 1.1.0: Release
+
+ - Add getDefaultStackProperies (#46) @hardillb
+ - Add flags to inhibit TCP/UDP inbound connections (#45) @Steve-Mcl
+ - Add guard for deleting suspended projects (#44) @hardillb
+
 #### 1.0.0: Release
 
  - Add LetsEncypt env var if https enabled
