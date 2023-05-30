@@ -238,14 +238,18 @@ module.exports = {
      * @return {Object}
      */
     remove: async (project) => {
-        const container = await this._docker.getContainer(project.id)
-        await container.stop()
-        if (this._projects[project.id].state !== 'suspended') {
-            try {
-                await container.remove()
-            } catch (err) {}
+        try {
+            const container = await this._docker.getContainer(project.id)
+            await container.stop()
+            if (this._projects[project.id].state !== 'suspended') {
+                try {
+                    await container.remove()
+                } catch (err) {}
+            }
+            delete this._projects[project.id]
+        } catch (err) {
+            console.log(err)
         }
-        delete this._projects[project.id]
     },
     /**
      * Retrieves details of a project's container
