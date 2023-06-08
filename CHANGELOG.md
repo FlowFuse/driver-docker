@@ -1,3 +1,7 @@
+#### 1.8.0: Release
+
+ - Fix Delete suspended projects (#57) @hardillb
+
 #### 1.7.0: Release
 
 
