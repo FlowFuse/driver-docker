@@ -37,6 +37,8 @@ const createContainer = async (project, domain) => {
     } else {
         projectURL = project.url
     }
+    const url = new URL(projectURL)
+    const hostname = url.hostname
     const teamID = this._app.db.models.Team.encodeHashid(project.TeamId)
     const authTokens = await project.refreshAuthTokens()
 
@@ -48,7 +50,7 @@ const createContainer = async (project, domain) => {
     contOptions.Env.push(`BASE_URL=${projectURL}`)
     // Only if we are using nginx ingress proxy
     const hostnameList = [
-        `${project.safeName}.${domain}`
+        hostname
     ] 
     // const hostnames = await project.getSetting('alternateHostnames')
     // if (hostnames) {
