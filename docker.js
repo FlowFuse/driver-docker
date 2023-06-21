@@ -51,13 +51,13 @@ const createContainer = async (project, domain) => {
     // Only if we are using nginx ingress proxy
     const hostnameList = [
         hostname
-    ] 
-    // const hostnames = await project.getSetting('alternateHostnames')
-    // if (hostnames) {
-    //     hostnames.forEach(name => {
-    //         hostnameList.push(name)
-    //     })
-    // }
+    ]
+    const hostnames = await project.getSetting('alternateHostnames')
+    if (hostnames) {
+        hostnames.forEach(name => {
+            hostnameList.push(name)
+        })
+    }
     contOptions.Env.push(`VIRTUAL_HOST=${hostnameList.join(',')}`)
     if (baseURL.protocol === 'https:') {
         contOptions.Env.push(`LETSENCRYPT_HOST=${hostnameList.join(',')}`)
