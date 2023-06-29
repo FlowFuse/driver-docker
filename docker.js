@@ -48,19 +48,9 @@ const createContainer = async (project, domain) => {
     // TODO this needs to come from a central point
     contOptions.Env.push('FORGE_URL=' + this._app.config.api_url)
     contOptions.Env.push(`BASE_URL=${projectURL}`)
-    // Only if we are using nginx ingress proxy
-    const hostnameList = [
-        hostname
-    ]
-    const hostnames = await project.getSetting('alternateHostnames')
-    if (hostnames) {
-        hostnames.forEach(name => {
-            hostnameList.push(name)
-        })
-    }
-    contOptions.Env.push(`VIRTUAL_HOST=${hostnameList.join(',')}`)
+    contOptions.Env.push(`VIRTUAL_HOST=${hostname}`)
     if (baseURL.protocol === 'https:') {
-        contOptions.Env.push(`LETSENCRYPT_HOST=${hostnameList.join(',')}`)
+        contOptions.Env.push(`LETSENCRYPT_HOST=${hostname}`)
     }
     contOptions.Env.push('VIRTUAL_PORT=1880')
     // httpStorage settings
