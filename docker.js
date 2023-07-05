@@ -31,7 +31,14 @@ const createContainer = async (project, domain) => {
     // TODO http/https needs to be dynamic (or we just enforce https?)
     // and port number
     const baseURL = new URL(this._app.config.base_url)
-    const projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
+    let projectURL
+    if (!project.url) {
+        projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
+    } else {
+        projectURL = project.url
+    }
+    const url = new URL(projectURL)
+    const hostname = url.hostname
     const teamID = this._app.db.models.Team.encodeHashid(project.TeamId)
     const authTokens = await project.refreshAuthTokens()
 
@@ -41,10 +48,9 @@ const createContainer = async (project, domain) => {
     // TODO this needs to come from a central point
     contOptions.Env.push('FORGE_URL=' + this._app.config.api_url)
     contOptions.Env.push(`BASE_URL=${projectURL}`)
-    // Only if we are using nginx ingress proxy
-    contOptions.Env.push(`VIRTUAL_HOST=${project.safeName}.${domain}`)
+    contOptions.Env.push(`VIRTUAL_HOST=${hostname}`)
     if (baseURL.protocol === 'https:') {
-        contOptions.Env.push(`LETSENCRYPT_HOST=${project.safeName}.${domain}`)
+        contOptions.Env.push(`LETSENCRYPT_HOST=${hostname}`)
     }
     contOptions.Env.push('VIRTUAL_PORT=1880')
     // httpStorage settings
