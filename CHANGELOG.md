@@ -1,3 +1,8 @@
+#### 1.9.0: Release
+
+ - Allow hosting domain to be changed (#60) @hardillb
+ - Add package-lock.json (#61) @Pezmc
+
 #### 1.8.0: Release
 
  - Fix Delete suspended projects (#57) @hardillb
