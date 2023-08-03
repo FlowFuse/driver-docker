@@ -1,3 +1,7 @@
+#### 1.10.0: Release
+
+ - Chore: Set root flag in eslint (#63) @Pezmc
+
 #### 1.9.0: Release
 
  - Allow hosting domain to be changed (#60) @hardillb
