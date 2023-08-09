@@ -32,12 +32,11 @@ const createContainer = async (project, domain) => {
     // and port number
     const baseURL = new URL(this._app.config.base_url)
     let projectURL
-    if (!project.url) {
-        projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
+    if (!project.url.startWith('http')) {
+        projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}${project.url}`
     } else {
         projectURL = project.url
     }
-    console.log(project.url, projectURL)
     const url = new URL(projectURL)
     const hostname = url.hostname
     const teamID = this._app.db.models.Team.encodeHashid(project.TeamId)
