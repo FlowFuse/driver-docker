@@ -32,10 +32,11 @@ const createContainer = async (project, domain) => {
     // and port number
     const baseURL = new URL(this._app.config.base_url)
     let projectURL
-    if (!project.url) {
+    if (!project.url.startsWith('http')) {
         projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
     } else {
-        projectURL = project.url
+        const temp = new URL(project.url)
+        projectURL = `${temp.protocol}//${temp.hostname}${temp.port ? ':' + temp.port : ''}`
     }
     const url = new URL(projectURL)
     const hostname = url.hostname
