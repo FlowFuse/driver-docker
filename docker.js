@@ -35,7 +35,9 @@ const createContainer = async (project, domain) => {
     if (!project.url.startWith('http')) {
         projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
     } else {
-        projectURL = project.url
+        const temp = new URL(project.url)
+        projectURL = `${temp.protocol}//${temp.hostname}${temp.port ? ':' + temp.port : ''}`
+        // projectURL = project.url
     }
     const url = new URL(projectURL)
     const hostname = url.hostname
