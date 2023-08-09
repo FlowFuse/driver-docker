@@ -33,7 +33,7 @@ const createContainer = async (project, domain) => {
     const baseURL = new URL(this._app.config.base_url)
     let projectURL
     if (!project.url.startWith('http')) {
-        projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}${project.url}`
+        projectURL = `${baseURL.protocol}//${project.safeName}.${this._options.domain}`
     } else {
         projectURL = project.url
     }
