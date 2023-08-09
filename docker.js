@@ -37,6 +37,7 @@ const createContainer = async (project, domain) => {
     } else {
         projectURL = project.url
     }
+    console.log(project.url, projectURL)
     const url = new URL(projectURL)
     const hostname = url.hostname
     const teamID = this._app.db.models.Team.encodeHashid(project.TeamId)
