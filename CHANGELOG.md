@@ -1,3 +1,7 @@
+#### 1.10.1: Release
+
+ - Fix editor path (#66) @hardillb
+
 #### 1.10.0: Release
 
  - Chore: Set root flag in eslint (#63) @Pezmc

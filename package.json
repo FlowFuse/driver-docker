@@ -1,6 +1,6 @@
 {
     "name": "@flowforge/docker",
-    "version": "1.10.0",
+    "version": "1.10.1",
     "description": "Docker driver for FlowForge",
     "main": "docker.js",
     "scripts": {
