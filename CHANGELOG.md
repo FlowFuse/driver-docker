@@ -1,3 +1,7 @@
+#### 1.11.0: Release
+
+ - Bump word-wrap from 1.2.3 to 1.2.5 (#68) @app/dependabot
+
 #### 1.10.1: Release
 
  - Fix editor path (#66) @hardillb
