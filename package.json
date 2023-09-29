@@ -1,7 +1,7 @@
 {
     "name": "@flowforge/docker",
     "version": "1.12.0",
-    "description": "Docker driver for FlowForge",
+    "description": "Docker driver for FlowFuse",
     "main": "docker.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,14 +10,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/flowforge/flowforge-driver-docker.git"
+        "url": "git+https://github.com/FlowFuse/driver-docker.git"
     },
     "bugs": {
-        "url": "https://github.com/flowforge/flowforge-driver-docker/issues"
+        "url": "https://github.com/FlowFuse/driver-docker/issues"
     },
-    "homepage": "https://github.com/flowforge/flowforge-driver-docker#readme",
+    "homepage": "https://github.com/FlowFuse/driver-docker#readme",
     "author": {
-        "name": "FlowFlow Inc."
+        "name": "FlowFuse Inc."
     },
     "license": "Apache-2.0",
     "dependencies": {

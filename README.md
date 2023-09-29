@@ -1,6 +1,6 @@
-# FlowForge Docker Container Driver
+# FlowFuse Docker Container Driver
 
-FlowForge driver to create projects as docker containers
+FlowFuse driver to create projects as docker containers
 
 ## Configuration
 
