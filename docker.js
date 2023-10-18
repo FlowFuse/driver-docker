@@ -72,6 +72,14 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push('FORGE_LICENSE_TYPE=ee')
     }
 
+    if (stack.memory) {
+        contOptions.Env.push(`FORGE_MEMORY_LIMIT=${stack.memory}`)
+    }
+
+    if (stack.cpu) {
+        contOptions.Env.push(`FORGE_CPU_LIMIT=${stack.cpu}`)
+    }
+
     const credentialSecret = await project.getSetting('credentialSecret')
     if (credentialSecret) {
         contOptions.Env.push(`FORGE_NR_SECRET=${credentialSecret}`)
