@@ -1,3 +1,9 @@
+#### 1.13.0: Release
+
+ - Expose cpu/mem limits (#73) @hardillb
+ - Update ff references in package.json (#72) @knolleary
+ - Reusable workflow reference name change (#71) @ppawlowski
+
 #### 1.12.0: Release
 
 
