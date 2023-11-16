@@ -85,6 +85,13 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push(`FORGE_NR_SECRET=${credentialSecret}`)
     }
 
+    if (this._app.config.driver.options.privateCA) {
+        contOptions.Binds = [
+            `${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`
+        ]
+        contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
+    }
+
     const container = await this._docker.createContainer(contOptions)
     return container.start()
         .then(async () => {
