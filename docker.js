@@ -1,3 +1,4 @@
+const fs = require('fs')
 const got = require('got')
 const Docker = require('dockerode')
 
@@ -83,6 +84,13 @@ const createContainer = async (project, domain) => {
     const credentialSecret = await project.getSetting('credentialSecret')
     if (credentialSecret) {
         contOptions.Env.push(`FORGE_NR_SECRET=${credentialSecret}`)
+    }
+
+    if (this._app.config.driver.options.privateCA && fs.existsSync(this._app.config.driver.options.privateCA)) {
+        contOptions.Binds = [
+            `${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`
+        ]
+        contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
     }
 
     const container = await this._docker.createContainer(contOptions)
