@@ -1,3 +1,7 @@
+#### 1.14.0: Release
+
+ - Add support for Private CA (#75) @hardillb
+
 #### 1.13.0: Release
 
  - Expose cpu/mem limits (#73) @hardillb
