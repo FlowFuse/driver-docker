@@ -4,8 +4,6 @@ FlowFuse driver to create projects as docker containers
 
 ## Configuration
 
-## Configuration
-
 In the `flowforge.yml` file
 
 ```yaml
