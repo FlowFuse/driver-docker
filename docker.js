@@ -204,10 +204,10 @@ module.exports = {
             stack: {
                 properties: {
                     cpu: {
-                        label: 'CPU Cores (%)',
-                        validate: '^([1-9][0-9]?|100)$',
-                        invalidMessage: 'Invalid value - must be a number between 1 and 100',
-                        description: 'How much of a single CPU core each Project should receive'
+                        label: 'CPU Cores (in 1/100th units)',
+                        validate: '^([1-9][0-9]{0,2}|1000)$',
+                        invalidMessage: 'Invalid value - must be a number between 1 and 1000, where 100 represents 1 CPU core',
+                        description: 'Defines the CPU resources each Project should receive, in units of 1/100th of a CPU core. 100 equates to 1 CPU core'
                     },
                     memory: {
                         label: 'Memory (MB)',
