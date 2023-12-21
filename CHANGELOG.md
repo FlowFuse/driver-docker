@@ -1,3 +1,9 @@
+#### 1.15.0: Release
+
+ - #3174: Enable Multi-Core CPU Support for Node-RED Projects (#79) @elenaviter
+ - Update npm-publish action version to v2 (#78) @ppawlowski
+ - Update npm package scope (#77) @knolleary
+
 #### 1.14.0: Release
 
  - Add support for Private CA (#75) @hardillb
