@@ -14,11 +14,13 @@ driver:
     socket: /var/run/docker.sock
     registry: containers.flowforge.com
     privateCA: /full/path/to/chain.pem
+    logPassthrough: true
 ```
 
  - `registry` is the Docker Registry to load Stack Containers from (default: Docker Hub)
  - `socket` is the path to the docker unix domain socket (default: /var/run/docker.sock)
- - privateCA: is the fully qualified path to a pem file containing trusted CA cert chain (default: not set)
+ - `privateCA`: is the fully qualified path to a pem file containing trusted CA cert chain (default: not set)
+ - `logPassthrough` Have Node-RED logs printed in JSON format to container stdout (default: false)
 
 ### Configuration via environment variables
 
