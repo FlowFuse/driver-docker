@@ -14,7 +14,7 @@ driver:
     socket: /var/run/docker.sock
     registry: containers.flowforge.com
     privateCA: /full/path/to/chain.pem
-    logPasthrough: true
+    logPassthrough: true
 ```
 
  - `registry` is the Docker Registry to load Stack Containers from (default: Docker Hub)
