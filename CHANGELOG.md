@@ -1,3 +1,7 @@
+#### 2.1.0: Release
+
+ - Add log passthrough support (#82) @hardillb
+
 #### 2.0.0: Release
 
 
