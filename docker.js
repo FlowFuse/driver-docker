@@ -441,7 +441,7 @@ module.exports = {
         const properties = {
             cpu: 10,
             memory: 256,
-            container: 'flowforge/node-red',
+            container: 'flowfuse/node-red',
             ...this._app.config.driver.options?.default_stack
         }
 
