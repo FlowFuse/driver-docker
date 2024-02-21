@@ -97,6 +97,40 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
     }
 
+    const containerList = await this._docker.listImages()
+    let containerFound = false
+    for (const cont of containerList) {
+        if (cont.RepoTags.includes(stack.container)) {
+            containerFound = true
+            break
+        }
+    }
+
+    if (!containerFound) {
+        this._app.log.info(`Container for stack ${stack.name} not found, pulling ${stack.container}`)
+        // https://github.com/apocas/dockerode/issues/703
+        try {
+            await new Promise((resolve, reject) => {
+                this._docker.pull(stack.container, (err, stream) => {
+                    if (!err) {
+                        this._docker.modem.followProgress(stream, onFinished)
+                        function onFinished (err, output) {
+                            if (!err) {
+                                resolve(true)
+                                return
+                            }
+                            reject(err)
+                        }
+                    } else {
+                        reject(err)
+                    }
+                })
+            })
+        } catch (err) {
+            this._app.log.debug(`Error pulling image ${stack.container} ${err.message}`)
+        }
+    }
+
     const container = await this._docker.createContainer(contOptions)
     return container.start()
         .then(async () => {
