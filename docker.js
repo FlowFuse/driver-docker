@@ -108,7 +108,7 @@ const createContainer = async (project, domain) => {
     }
 
     if (!containerFound) {
-        this._app.log.debug(`Container for stack ${stack.name} not found, pulling ${stack.container}`)
+        this._app.log.info(`Container for stack ${stack.name} not found, pulling ${stack.container}`)
         try {
             await new Promise((resolve, reject) => {
                 this._docker.pull(stack.container, (err, stream) => {
@@ -123,8 +123,7 @@ const createContainer = async (project, domain) => {
                 } )
             })
         } catch (err) {
-            this._app.log.debug(`Error pulling image ${stack.container}`)
-            console.log(err)
+            this._app.log.debug(`Error pulling image ${stack.container} ${err.message}`)
         }
     }
 
