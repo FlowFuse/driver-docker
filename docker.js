@@ -110,7 +110,18 @@ const createContainer = async (project, domain) => {
     if (!containerFound) {
         this._app.log.debug(`Container for stack ${stack.name} not found, pulling ${stack.container}`)
         try {
-            await this._docker.createImage({ fromImage: stack.container})
+            await new Promise((resolve, reject) => {
+                this._docker.pull(stack.container, (err, stream) => {
+                    this._docker.modem.followProgress(stream, onFinished)
+                    function onFinished(err, output) {
+                        if (!err) {
+                            resolve(true)
+                            return
+                        }
+                        reject(err)
+                    }
+                } )
+            })
         } catch (err) {
             this._app.log.debug(`Error pulling image ${stack.container}`)
             console.log(err)
