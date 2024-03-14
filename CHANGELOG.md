@@ -1,3 +1,8 @@
+#### 2.2.0: Release
+
+ - Pull missing Stack containers on first use (#85) @hardillb
+ - Change default stack container (#84) @hardillb
+
 #### 2.1.0: Release
 
  - Add log passthrough support (#82) @hardillb
