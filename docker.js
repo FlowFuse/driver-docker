@@ -1,4 +1,3 @@
-const fs = require('fs')
 const got = require('got')
 const Docker = require('dockerode')
 
