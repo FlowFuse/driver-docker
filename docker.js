@@ -1,4 +1,3 @@
-const fs = require('fs')
 const got = require('got')
 const Docker = require('dockerode')
 
@@ -90,7 +89,7 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push('FORGE_LOG_PASSTHROUGH=true')
     }
 
-    if (this._app.config.driver.options?.privateCA && fs.existsSync(this._app.config.driver.options?.privateCA)) {
+    if (this._app.config.driver.options?.privateCA) {
         contOptions.Binds = [
             `${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`
         ]
