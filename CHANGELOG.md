@@ -1,3 +1,7 @@
+#### 2.2.1: Release
+
+ - Fix loading private CA certs in Instances (#87) @hardillb
+
 #### 2.2.0: Release
 
  - Pull missing Stack containers on first use (#85) @hardillb
