@@ -98,8 +98,13 @@ const createContainer = async (project, domain) => {
 
     const containerList = await this._docker.listImages()
     let containerFound = false
+    let stackName = stack.container
+    // add ":latest" to stack containers with no tag
+    if (stackName.indexOf(':') === -1) {
+        stackName = stackName + ':latest'
+    }
     for (const cont of containerList) {
-        if (cont.RepoTags.includes(stack.container)) {
+        if (cont.RepoTags.includes(stackName)) {
             containerFound = true
             break
         }
@@ -474,7 +479,7 @@ module.exports = {
         const properties = {
             cpu: 10,
             memory: 256,
-            container: 'flowfuse/node-red',
+            container: 'flowfuse/node-red:latest',
             ...this._app.config.driver.options?.default_stack
         }
 
