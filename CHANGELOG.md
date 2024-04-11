@@ -1,3 +1,7 @@
+#### 2.3.0: Release
+
+ - Only pull stack container if missing (#89) @hardillb
+
 #### 2.2.1: Release
 
  - Fix loading private CA certs in Instances (#87) @hardillb
