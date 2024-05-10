@@ -90,9 +90,13 @@ const createContainer = async (project, domain) => {
     }
 
     if (this._app.config.driver.options?.privateCA) {
-        contOptions.Binds = [
-            `${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`
-        ]
+        if (contOptions.HostConfig?.Binds) {
+            contOptions.HostConfig.Binds.push(`${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`)
+        } else {
+            contOptions.HostConfig.Binds = [
+                `${this._app.config.driver.options.privateCA}:/usr/local/ssl-certs/chain.pem`
+            ]
+        }
         contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
     }
 
