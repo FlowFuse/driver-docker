@@ -1,3 +1,10 @@
+#### 2.5.0: Release
+
+ - Bump actions/checkout from 1 to 4 (#98) @app/dependabot
+ - Bump actions/setup-node from 1 to 4 (#97) @app/dependabot
+ - Enable dependabot for github actions (#95) @ppawlowski
+ - Fix privateCA mount (#94) @hardillb
+
 #### 2.4.0: Release
 
 
