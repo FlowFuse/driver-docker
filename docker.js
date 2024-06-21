@@ -1,5 +1,7 @@
 const got = require('got')
 const Docker = require('dockerode')
+const path = require('path')
+const { mkdirSync, rmSync } = require('fs')
 
 const createContainer = async (project, domain) => {
     const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
@@ -98,6 +100,18 @@ const createContainer = async (project, domain) => {
             ]
         }
         contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
+    }
+
+    if (this._app.config.driver.options?.storage?.enabled || this._app.config.driver.options?.storage?.path) {
+        const projectPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
+        mkdirSync(projectPath)
+        if (Array.isArray(contOptions.HostConfig?.Binds)) {
+            contOptions.HostConfig.Binds.push(`${projectPath}:/data/storage`)
+        } else {
+            contOptions.HostConfig.Binds = [
+                `${projectPath}:/data/storage`
+            ]
+        }
     }
 
     const containerList = await this._docker.listImages()
@@ -313,6 +327,19 @@ module.exports = {
                 await container.stop()
                 await container.remove()
             } catch (err) {}
+        }
+        if (this._app.config.driver.options?.storage?.enabled) {
+            // need to be sure we have permission to delete the dir and it's contents?
+            try {
+                // This is the wrong path, the directory will need mounting into the forge-docker container
+                // const projectPersistentPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
+                // rmSync(projectPersistentPath, { recursive: true, force: true})
+                // This is better and assumes that directory is mounted on `/opt/storage`
+                const projectPersistentPath = path.join('/opt/storage', project.id)
+                rmSync(projectPersistentPath, { recursive: true, force: true})
+            } catch (err) {
+                this._app.log.error(`[docker] Project ${project.id} - error deleting persistent storage: ${err.stack}`)
+            }
         }
         delete this._projects[project.id]
     },
