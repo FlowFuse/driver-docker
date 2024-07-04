@@ -1,3 +1,6 @@
+#### 2.6.0: Release
+
+
 #### 2.5.0: Release
 
  - Bump actions/checkout from 1 to 4 (#98) @app/dependabot
