@@ -203,7 +203,6 @@ module.exports = {
             this._app.log.info(`[docker] using network ${networks[0].Name}`)
             this._network = networks[0].Name
         }
-        
 
         // Get a list of all projects - with the absolute minimum of fields returned
         const projects = await app.db.models.Project.findAll({
