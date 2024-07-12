@@ -181,17 +181,18 @@ module.exports = {
 
         const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
         if (networks.length > 1) {
-            const filteredNetworks = networks.filter(async net => {
-                const details = await this._docker.getNetwork(net.Id).inspect()
+            const filteredNetworks = []
+            for (let j = 0; j < networks.length; j++) {
+                const details = await this._docker.getNetwork(networks[j].Id).inspect()
                 const containers = Object.keys(details.Containers)
                 for (let i = 0; i < containers.length; i++) {
                     console.log(containers[i])
                     if (containers[i].startsWith(process.env.HOSTNAME)) {
-                        return true
+                        filteredNetworks.push(networks[j])
                     }
                 }
-                return false
-            })
+            }
+            console.log(JSON.stringify(filteredNetworks))
             if (filteredNetworks[0]) {
                 this._app.log.info(`[docker] using network ${filteredNetworks[0].Name}`)
                 this._network = filteredNetworks[0].Name
