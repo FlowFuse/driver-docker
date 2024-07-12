@@ -182,20 +182,32 @@ module.exports = {
         const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
         console.log(networks)
         console.log(process.env.HOSTNAME)
-        const filteredNetworks = networks.filter(net => {
-            const details = await this._docker.getNetwork(net.Id).inspect()
-            const containers = Object.keys(details.Containers)
-            for (let i = 0; i < containers.length; i++) {
-                console.log(containers[i])
-                if (containers[i].startsWith(process.env.HOSTNAME)) {
-                    return true
+        // if (networks.length > 1) {
+            const filteredNetworks = networks.filter(async net => {
+                const details = await this._docker.getNetwork(net.Id).inspect()
+                const containers = Object.keys(details.Containers)
+                for (let i = 0; i < containers.length; i++) {
+                    console.log(containers[i])
+                    if (containers[i].startsWith(process.env.HOSTNAME)) {
+                        return true
+                    }
                 }
+                return false
+            })
+            console.log("filtered")
+            console.log(JSON.stringify(filteredNetworks, null, 2))
+            if (filteredNetworks[0]) {
+                this._app.log.info(`[docker] using network ${filteredNetworks[0].Name}`)
+                this._network = filteredNetworks[0].Name
+            } else {
+                this._app.log.info('[docker] unable to find network')
+                process.exit(-9)
             }
-            return false
-        })
-        console.log("filetered")
-        console.log(JSON.stringify(filteredNetworks, null, 2))
-        this._network = filteredNetworks[0].Name
+        // } else {
+        //     this._app.log.info(`[docker] using network ${networks[0].Name}`)
+        //     this._network = networks[0].Name
+        // }
+        
 
         // Get a list of all projects - with the absolute minimum of fields returned
         const projects = await app.db.models.Project.findAll({
