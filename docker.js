@@ -180,16 +180,20 @@ module.exports = {
         }
 
         const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
+        console.log(networks)
+        console.log(process.env.HOSTNAME)
         const filteredNetworks = networks.filter(net => {
             const containers = Object.keys(net.Containers)
             for (let i = 0; i < containers.length; i++) {
+                console.log(containers[i])
                 if (containers[i].startsWith(process.env.HOSTNAME)) {
                     return true
                 }
             }
             return false
         })
-
+        console.log("filetered")
+        console.log(JSON.stringify(filteredNetworks, null, 2))
         this._network = filteredNetworks[0].Name
 
         // Get a list of all projects - with the absolute minimum of fields returned
