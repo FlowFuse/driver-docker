@@ -183,7 +183,8 @@ module.exports = {
         console.log(networks)
         console.log(process.env.HOSTNAME)
         const filteredNetworks = networks.filter(net => {
-            const containers = Object.keys(net.Containers)
+            const details = await this._docker.getNetwork(net.Id).inspect()
+            const containers = Object.keys(details.Containers)
             for (let i = 0; i < containers.length; i++) {
                 console.log(containers[i])
                 if (containers[i].startsWith(process.env.HOSTNAME)) {
