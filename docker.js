@@ -2,7 +2,6 @@ const got = require('got')
 const Docker = require('dockerode')
 
 const createContainer = async (project, domain) => {
-    const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
     const stack = project.ProjectStack.properties
     const contOptions = {
         Image: stack.container,
@@ -15,7 +14,7 @@ const createContainer = async (project, domain) => {
         AttachStdout: false,
         AttachStderr: false,
         HostConfig: {
-            NetworkMode: networks[0].Name
+            NetworkMode: this._network
         }
     }
 
@@ -179,6 +178,19 @@ module.exports = {
         if (!options.registry) {
             options.registry = app.config.driver.options?.registry || '' // use docker hub
         }
+
+        const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
+        const filteredNetworks = networks.filter(net => {
+            const containers = Object.keys(net.Containers)
+            for (let i=0; i < containers.length; i++) {
+                if (containers[i].startsWith(env.process.HOSTNAME)) {
+                    return true
+                }
+            }
+            return false
+        })
+
+        this._network = filteredNetworks[0].Name
 
         // Get a list of all projects - with the absolute minimum of fields returned
         const projects = await app.db.models.Project.findAll({
