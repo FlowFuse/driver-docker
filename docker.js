@@ -180,9 +180,7 @@ module.exports = {
         }
 
         const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
-        console.log(networks)
-        console.log(process.env.HOSTNAME)
-        // if (networks.length > 1) {
+        if (networks.length > 1) {
             const filteredNetworks = networks.filter(async net => {
                 const details = await this._docker.getNetwork(net.Id).inspect()
                 const containers = Object.keys(details.Containers)
@@ -194,8 +192,6 @@ module.exports = {
                 }
                 return false
             })
-            console.log("filtered")
-            console.log(JSON.stringify(filteredNetworks, null, 2))
             if (filteredNetworks[0]) {
                 this._app.log.info(`[docker] using network ${filteredNetworks[0].Name}`)
                 this._network = filteredNetworks[0].Name
@@ -203,10 +199,10 @@ module.exports = {
                 this._app.log.info('[docker] unable to find network')
                 process.exit(-9)
             }
-        // } else {
-        //     this._app.log.info(`[docker] using network ${networks[0].Name}`)
-        //     this._network = networks[0].Name
-        // }
+        } else {
+            this._app.log.info(`[docker] using network ${networks[0].Name}`)
+            this._network = networks[0].Name
+        }
         
 
         // Get a list of all projects - with the absolute minimum of fields returned
