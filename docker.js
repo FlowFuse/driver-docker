@@ -186,13 +186,13 @@ module.exports = {
                 const details = await this._docker.getNetwork(networks[j].Id).inspect()
                 const containers = Object.keys(details.Containers)
                 for (let i = 0; i < containers.length; i++) {
-                    console.log(containers[i])
+                    // console.log(containers[i])
                     if (containers[i].startsWith(process.env.HOSTNAME)) {
                         filteredNetworks.push(networks[j])
                     }
                 }
             }
-            console.log(JSON.stringify(filteredNetworks))
+            // console.log(JSON.stringify(filteredNetworks, null, 2))
             if (filteredNetworks[0]) {
                 this._app.log.info(`[docker] using network ${filteredNetworks[0].Name}`)
                 this._network = filteredNetworks[0].Name
