@@ -103,9 +103,14 @@ const createContainer = async (project, domain) => {
     }
 
     if (this._app.config.driver.options?.storage?.enabled || this._app.config.driver.options?.storage?.path) {
-        const localPath = path.join('/opt/persistent-storage', project.id)
-        mkdirSync(localPath)
-        chownSync(localPath, 1000, 1000)
+        try {
+            const localPath = path.join('/opt/persistent-storage', project.id)
+            console.log(`Creating dir in container ${localPath}`)
+            mkdirSync(localPath)
+            chownSync(localPath, 1000, 1000)
+        } catch (err) {
+            this._app.log.info(`[docker] problem creating persistent storage for ${project.id}`)
+        }
         const projectPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
         if (Array.isArray(contOptions.HostConfig?.Binds)) {
             contOptions.HostConfig.Binds.push(`${projectPath}:/data/storage`)
