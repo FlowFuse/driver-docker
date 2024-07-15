@@ -200,9 +200,12 @@ module.exports = {
                 this._app.log.info('[docker] unable to find network')
                 process.exit(-9)
             }
-        } else {
+        } else if (networks.length === 1) {
             this._app.log.info(`[docker] using network ${networks[0].Name}`)
             this._network = networks[0].Name
+        } else {
+            this._app.log.info('[docker] unable to find network')
+            process.exit(-9)
         }
 
         // Get a list of all projects - with the absolute minimum of fields returned
