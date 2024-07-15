@@ -1,7 +1,7 @@
 const got = require('got')
 const Docker = require('dockerode')
 const path = require('path')
-const { mkdirSync, rmSync } = require('fs')
+const { chownSync, mkdirSync, rmSync } = require('fs')
 
 const createContainer = async (project, domain) => {
     const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
@@ -103,8 +103,10 @@ const createContainer = async (project, domain) => {
     }
 
     if (this._app.config.driver.options?.storage?.enabled || this._app.config.driver.options?.storage?.path) {
+        const localPath = path.join('/opt/persistent-storage', project.id)
+        mkdirSync(localPath)
+        chownSync(localPath, 1000, 1000)
         const projectPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
-        mkdirSync(projectPath)
         if (Array.isArray(contOptions.HostConfig?.Binds)) {
             contOptions.HostConfig.Binds.push(`${projectPath}:/data/storage`)
         } else {
@@ -335,7 +337,7 @@ module.exports = {
                 // const projectPersistentPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
                 // rmSync(projectPersistentPath, { recursive: true, force: true})
                 // This is better and assumes that directory is mounted on `/opt/storage`
-                const projectPersistentPath = path.join('/opt/storage', project.id)
+                const projectPersistentPath = path.join('/opt/persistent-storage', project.id)
                 rmSync(projectPersistentPath, { recursive: true, force: true})
             } catch (err) {
                 this._app.log.error(`[docker] Project ${project.id} - error deleting persistent storage: ${err.stack}`)
