@@ -343,7 +343,7 @@ module.exports = {
                 // rmSync(projectPersistentPath, { recursive: true, force: true})
                 // This is better and assumes that directory is mounted on `/opt/storage`
                 const projectPersistentPath = path.join('/opt/persistent-storage', project.id)
-                rmSync(projectPersistentPath, { recursive: true, force: true})
+                rmSync(projectPersistentPath, { recursive: true, force: true })
             } catch (err) {
                 this._app.log.error(`[docker] Project ${project.id} - error deleting persistent storage: ${err.stack}`)
             }
