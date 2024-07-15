@@ -2,7 +2,6 @@ const got = require('got')
 const Docker = require('dockerode')
 
 const createContainer = async (project, domain) => {
-    const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
     const stack = project.ProjectStack.properties
     const contOptions = {
         Image: stack.container,
@@ -15,7 +14,7 @@ const createContainer = async (project, domain) => {
         AttachStdout: false,
         AttachStderr: false,
         HostConfig: {
-            NetworkMode: networks[0].Name
+            NetworkMode: this._network
         }
     }
 
@@ -178,6 +177,35 @@ module.exports = {
 
         if (!options.registry) {
             options.registry = app.config.driver.options?.registry || '' // use docker hub
+        }
+
+        const networks = await this._docker.listNetworks({ filters: { label: ['com.docker.compose.network=flowforge'] } })
+        if (networks.length > 1) {
+            const filteredNetworks = []
+            for (let j = 0; j < networks.length; j++) {
+                const details = await this._docker.getNetwork(networks[j].Id).inspect()
+                const containers = Object.keys(details.Containers)
+                for (let i = 0; i < containers.length; i++) {
+                    // console.log(containers[i])
+                    if (containers[i].startsWith(process.env.HOSTNAME)) {
+                        filteredNetworks.push(networks[j])
+                    }
+                }
+            }
+            // console.log(JSON.stringify(filteredNetworks, null, 2))
+            if (filteredNetworks[0]) {
+                this._app.log.info(`[docker] using network ${filteredNetworks[0].Name}`)
+                this._network = filteredNetworks[0].Name
+            } else {
+                this._app.log.info('[docker] unable to find network')
+                process.exit(-9)
+            }
+        } else if (networks.length === 1) {
+            this._app.log.info(`[docker] using network ${networks[0].Name}`)
+            this._network = networks[0].Name
+        } else {
+            this._app.log.info('[docker] unable to find network')
+            process.exit(-9)
         }
 
         // Get a list of all projects - with the absolute minimum of fields returned
