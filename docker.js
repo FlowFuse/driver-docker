@@ -338,9 +338,6 @@ module.exports = {
         if (this._app.config.driver.options?.storage?.enabled) {
             // need to be sure we have permission to delete the dir and it's contents?
             try {
-                // This is the wrong path, the directory will need mounting into the forge-docker container
-                // const projectPersistentPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
-                // rmSync(projectPersistentPath, { recursive: true, force: true})
                 // This is better and assumes that directory is mounted on `/opt/storage`
                 const projectPersistentPath = path.join('/opt/persistent-storage', project.id)
                 rmSync(projectPersistentPath, { recursive: true, force: true })
