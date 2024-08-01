@@ -1,3 +1,11 @@
+#### 2.7.0: Release
+
+ - Persistent storage - Docker (#103) @hardillb
+ - Fix LOG_PASSTHROUGH (#104) @hardillb
+ - Fix network selection if more than one network labeled 'flowforge' (#102) @hardillb
+ - Update release-publish.yml to use NodeJS v18 (#101) @hardillb
+ - Bump JS-DevTools/npm-publish from 2 to 3 (#96) @app/dependabot
+
 #### 2.6.0: Release
 
 
