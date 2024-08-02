@@ -86,7 +86,7 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push(`FORGE_NR_SECRET=${credentialSecret}`)
     }
 
-    if (this._app.driver.options?.logPassthrough) {
+    if (this._app.config.driver.options?.logPassthrough) {
         contOptions.Env.push('FORGE_LOG_PASSTHROUGH=true')
     }
 
