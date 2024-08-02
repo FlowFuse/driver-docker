@@ -1,3 +1,7 @@
+#### 2.7.1: Release
+
+ - Fix logPassthrough (#106) @knolleary
+
 #### 2.7.0: Release
 
  - Persistent storage - Docker (#103) @hardillb
