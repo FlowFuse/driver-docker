@@ -11,7 +11,7 @@ In the `flowforge.yml` file
 driver:
   type: docker
   options:
-    socket: /var/run/docker.sock
+    socket: /tmp/docker.sock
     registry: containers.flowforge.com
     privateCA: /full/path/to/chain.pem
     logPassthrough: true
