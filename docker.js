@@ -172,7 +172,7 @@ const createContainer = async (project, domain) => {
 }
 
 const getStaticFileUrl = async (instance, filePath) => {
-    return `http://${instance.id}:2880/flowforge/files/_/${filePath}`
+    return `http://${instance.id}:2880/flowforge/files/_/${encodeURIComponent(filePath)}`
 }
 
 /**
