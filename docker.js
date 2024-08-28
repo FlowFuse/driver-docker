@@ -1,4 +1,5 @@
 const got = require('got')
+const FormData = require('form-data')
 const Docker = require('dockerode')
 const path = require('path')
 const { chownSync, mkdirSync, rmSync } = require('fs')
@@ -168,6 +169,10 @@ const createContainer = async (project, domain) => {
             await project.save()
             this._projects[project.id].state = 'starting'
         })
+}
+
+const getStaticFileUrl = async (instance, filePath) => {
+    return `http://${instance.id}:2880/flowforge/files/_/${encodeURIComponent(filePath)}`
 }
 
 /**
@@ -547,5 +552,62 @@ module.exports = {
         }
 
         return properties
+    },
+
+    // Static Assets API
+    listFiles: async (instance, filePath) => {
+        const fileUrl = await getStaticFileUrl(instance, filePath)
+        try {
+            return got.get(fileUrl).json()
+        } catch (err) {
+            err.statusCode = err.response.statusCode
+            throw err
+        }
+    },
+
+    updateFile: async (instance, filePath, update) => {
+        const fileUrl = await getStaticFileUrl(instance, filePath)
+        try {
+            return got.put(fileUrl, {
+                json: update
+            })
+        } catch (err) {
+            err.statusCode = err.response.statusCode
+            throw err
+        }
+    },
+
+    deleteFile: async (instance, filePath) => {
+        const fileUrl = await getStaticFileUrl(instance, filePath)
+        try {
+            return got.delete(fileUrl)
+        } catch (err) {
+            err.statusCode = err.response.statusCode
+            throw err
+        }
+    },
+    createDirectory: async (instance, filePath, directoryName) => {
+        const fileUrl = await getStaticFileUrl(instance, filePath)
+        try {
+            return got.post(fileUrl, {
+                json: { path: directoryName }
+            })
+        } catch (err) {
+            err.statusCode = err.response.statusCode
+            throw err
+        }
+    },
+    uploadFile: async (instance, filePath, fileBuffer) => {
+        const form = new FormData()
+        form.append('file', fileBuffer, { filename: filePath })
+        const fileUrl = await getStaticFileUrl(instance, filePath)
+        try {
+            return got.post(fileUrl, {
+                body: form
+            })
+        } catch (err) {
+            err.statusCode = err.response.statusCode
+            throw err
+        }
     }
 }
