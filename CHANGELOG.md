@@ -1,3 +1,8 @@
+#### 2.8.0: Release
+
+ - First pass files api for docker (#108) @hardillb
+ - Update README.md (#109) @hardillb
+
 #### 2.7.1: Release
 
  - Fix logPassthrough (#106) @knolleary
