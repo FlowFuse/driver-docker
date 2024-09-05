@@ -102,7 +102,7 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
     }
 
-    if (this._app.config.driver.options?.storage?.enabled || this._app.config.driver.options?.storage?.path) {
+    if (this._app.config.driver.options?.storage?.enabled && this._app.config.driver.options?.storage?.path) {
         try {
             const localPath = path.join('/opt/persistent-storage', project.id)
             console.log(`Creating dir in container ${localPath}`)
