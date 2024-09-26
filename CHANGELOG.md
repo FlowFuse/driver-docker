@@ -1,3 +1,7 @@
+#### 2.9.0: Release
+
+ - both storage options required (enabled & path) (#111) @hardillb
+
 #### 2.8.0: Release
 
  - First pass files api for docker (#108) @hardillb
