@@ -17,7 +17,10 @@ const createContainer = async (project, domain) => {
         AttachStdout: false,
         AttachStderr: false,
         HostConfig: {
-            NetworkMode: this._network
+            NetworkMode: this._network,
+            RestartPolicy: {
+                Name: 'unless-stopped'
+            }
         }
     }
 
