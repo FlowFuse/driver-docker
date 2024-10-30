@@ -139,7 +139,7 @@ const createContainer = async (project, domain) => {
     }
 
     if (!containerFound) {
-        this._app.log.info(`Container for stack ${stack.name} not found, pulling ${stack.container}`)
+        this._app.log.info(`Container for stack ${project.ProjectStack.name} not found, pulling ${stack.container}`)
         // https://github.com/apocas/dockerode/issues/703
         try {
             await new Promise((resolve, reject) => {
