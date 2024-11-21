@@ -1,3 +1,8 @@
+#### 2.11.0: Release
+
+ - Log the correct Stack Name when pulling image (#116) @hardillb
+ - Add "unless-stopped" flag to Instance containers (#115) @hardillb
+
 #### 2.10.0: Release
 
 
