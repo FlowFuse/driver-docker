@@ -1,3 +1,6 @@
+#### 2.12.0: Release
+
+
 #### 2.11.0: Release
 
  - Log the correct Stack Name when pulling image (#116) @hardillb
