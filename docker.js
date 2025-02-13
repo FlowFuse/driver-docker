@@ -206,7 +206,7 @@ const createMQttTopicAgent = async (broker) => {
     contOptions.Env.push(`FORGE_URL=${this._app.config.api_url}`)
     contOptions.Env.push(`FORGE_BROKER_ID=${broker.hashid}`)
     contOptions.Env.push(`FORGE_TEAM_ID=${broker.Team.hashid}`)
-    
+
     const containerList = await this._docker.listImages()
     let containerFound = false
     let stackName = image
@@ -220,7 +220,7 @@ const createMQttTopicAgent = async (broker) => {
         }
     }
     if (!containerFound) {
-        this._app.log.info(`Container for MQTT Schema Agent not found, pulling ${stack.container}`)
+        this._app.log.info(`Container for MQTT Schema Agent not found, pulling ${stackName}`)
         try {
             await new Promise((resolve, reject) => {
                 this._docker.pull(stackName, (err, stream) => {
@@ -239,7 +239,7 @@ const createMQttTopicAgent = async (broker) => {
                 })
             })
         } catch (err) {
-            this._app.log.debug(`Error pulling image ${stack.container} ${err.message}`)
+            this._app.log.debug(`Error pulling image ${stackName} ${err.message}`)
         }
     }
     const container = await this._docker.createContainer(contOptions)
@@ -682,7 +682,7 @@ module.exports = {
         }
     },
 
-    //Broker Agent
+    // Broker Agent
     startBrokerAgent: async (broker) => {
         createMQttTopicAgent(broker)
     },
@@ -704,7 +704,6 @@ module.exports = {
         } catch (err) {
             return { error: 'error_getting_status', message: err.toString() }
         }
-
     },
     sendBrokerAgentCommand: async (broker, command) => {
         const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
