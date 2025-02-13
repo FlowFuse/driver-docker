@@ -379,7 +379,7 @@ module.exports = {
                     if (broker.Team) {
                         if (broker.state === 'running') {
                             const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
-                            this._app.log.info(`[docker] Testing MQTT Agent ${broker.hashid} container exists`)
+                            this._app.log.info(`[docker] Testing MQTT Agent ${name} container exists`)
                             this._app.log.debug(`${name}`)
                             let container
                             try {
@@ -397,13 +397,13 @@ module.exports = {
                                 if (container) {
                                     const state = await container.inspect()
                                     if (!state.State.Running) {
-                                        this._app.log.debug(`[docker] MQTT Agent ${name} - restarting container [${container.id.substring(0, 12)}]`)
+                                        this._app.log.info(`[docker] MQTT Agent ${name} - restarting container [${container.id.substring(0, 12)}]`)
                                         await container.start()
                                     } else {
-                                        this._app.log.debug(`[docker] MQTT Agent ${name} - already running container [${container.id.substring(0, 12)}]`)
+                                        this._app.log.info(`[docker] MQTT Agent ${name} - already running container [${container.id.substring(0, 12)}]`)
                                     }
                                 } else {
-                                    this._app.log.debug(`[docker] MQTT Agent ${name} - recreating container`)
+                                    this._app.log.info(`[docker] MQTT Agent ${name} - recreating container`)
                                     createMQttTopicAgent(broker)
                                 }
                             } catch (err) {
