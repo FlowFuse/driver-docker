@@ -178,6 +178,74 @@ const getStaticFileUrl = async (instance, filePath) => {
     return `http://${instance.id}:2880/flowforge/files/_/${encodeURIComponent(filePath)}`
 }
 
+const createMQttTopicAgent = async (broker) => {
+    const image = this._app.config.driver.options?.mqttSchemaContainer || `${this._app.config.driver.options?.registry ? this._app.config.driver.options.registry + '/' : ''}flowfuse/mqtt-schema-agent`
+    const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+    const contOptions = {
+        Image: image,
+        name,
+        Env: [],
+        Labels: {
+            flowforge: 'mqtt-agent'
+        },
+        AttachStdin: false,
+        AttachStdout: false,
+        AttachStderr: false,
+        HostConfig: {
+            NetworkMode: this._network,
+            RestartPolicy: {
+                Name: 'unless-stopped'
+            },
+            NanoCpus: (10 * (10 ** 9)), // 10%
+            Memory: (100 * 1024 * 1024) // 100mb
+        }
+    }
+
+    const { token } = await broker.refreshAuthTokens()
+    contOptions.Env.push(`FORGE_TEAM_TOKEN=${token}`)
+    contOptions.Env.push(`FORGE_URL=${this._app.config.api_url}`)
+    contOptions.Env.push(`FORGE_BROKER_ID=${broker.hashid}`)
+    contOptions.Env.push(`FORGE_TEAM_ID=${broker.Team.hashid}`)
+    
+    const containerList = await this._docker.listImages()
+    let containerFound = false
+    let stackName = image
+    if (stackName.indexOf(':') === -1) {
+        stackName = stackName + ':latest'
+    }
+    for (const cont of containerList) {
+        if (cont.RepoTags.includes(stackName)) {
+            containerFound = true
+            break
+        }
+    }
+    if (!containerFound) {
+        this._app.log.info(`Container for MQTT Schema Agent not found, pulling ${stack.container}`)
+        try {
+            await new Promise((resolve, reject) => {
+                this._docker.pull(stackName, (err, stream) => {
+                    if (!err) {
+                        this._docker.modem.followProgress(stream, onFinished)
+                        function onFinished (err, output) {
+                            if (!err) {
+                                resolve(true)
+                                return
+                            }
+                            reject(err)
+                        }
+                    } else {
+                        reject(err)
+                    }
+                })
+            })
+        } catch (err) {
+            this._app.log.debug(`Error pulling image ${stack.container} ${err.message}`)
+        }
+    }
+    const container = await this._docker.createContainer(contOptions)
+    await container.start()
+}
+
 /**
  * Docker Container driver
  *
@@ -611,6 +679,47 @@ module.exports = {
         } catch (err) {
             err.statusCode = err.response.statusCode
             throw err
+        }
+    },
+
+    //Broker Agent
+    startBrokerAgent: async (broker) => {
+        createMQttTopicAgent(broker)
+    },
+    stopBrokerAgent: async (broker) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        try {
+            const container = await this._docker.getContainer(name)
+            await container.stop()
+            await container.remove()
+        } catch (err) {
+            console.err(err)
+        }
+    },
+    getBrokerAgentState: async (broker) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        try {
+            const status = await got.get(`http://${name}:3500/api/v1/status`).json()
+            return status
+        } catch (err) {
+            return { error: 'error_getting_status', message: err.toString() }
+        }
+
+    },
+    sendBrokerAgentCommand: async (broker, command) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        if (command === 'start' || command === 'restart') {
+            try {
+                await got.post(`http://${name}:3500/api/v1/commands/start`)
+            } catch (err) {
+
+            }
+        } else if (command === 'stop') {
+            try {
+                await got.post(`http://${name}:3500/api/v1/commands/stop`)
+            } catch (err) {
+
+            }
         }
     }
 }
