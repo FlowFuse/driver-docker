@@ -322,7 +322,7 @@ module.exports = {
             }
         })
 
-        this._initialCheckTimeout = setTimeout(() => {
+        this._initialCheckTimeout = setTimeout(async () => {
             this._app.log.debug('[docker] Restarting projects')
             projects.forEach(async (project) => {
                 try {
@@ -369,6 +369,50 @@ module.exports = {
                     this._app.log.error(`[docker] Project ${project.id} - error resuming project: ${err.stack}`)
                 }
             })
+
+            if (this._app.db.models.BrokerCredentials) {
+                const brokers = await this._app.db.models.BrokerCredentials.findAll({
+                    include: [{ model: this._app.db.models.Team }]
+                })
+
+                brokers.forEach(async (broker) => {
+                    if (broker.Team) {
+                        if (broker.state === 'running') {
+                            const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+                            this._app.log.info(`[docker] Testing MQTT Agent ${broker.hashid} container exists`)
+                            this._app.log.debug(`${name}`)
+                            let container
+                            try {
+                                container = await this._docker.listContainers({
+                                    all: true,
+                                    filters: {
+                                        name: [name]
+                                    }
+                                })
+                                if (container[0]) {
+                                    container = await this._docker.getContainer(container[0].Id)
+                                } else {
+                                    container = undefined
+                                }
+                                if (container) {
+                                    const state = await container.inspect()
+                                    if (!state.State.Running) {
+                                        this._app.log.debug(`[docker] MQTT Agent ${name} - restarting container [${container.id.substring(0, 12)}]`)
+                                        await container.start()
+                                    } else {
+                                        this._app.log.debug(`[docker] MQTT Agent ${name} - already running container [${container.id.substring(0, 12)}]`)
+                                    }
+                                } else {
+                                    this._app.log.debug(`[docker] MQTT Agent ${name} - recreating container`)
+                                    createMQttTopicAgent(broker)
+                                }
+                            } catch (err) {
+                                console.log(err)
+                            }
+                        }
+                    }
+                })
+            }
         }, 1000)
 
         return {
