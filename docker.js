@@ -196,7 +196,7 @@ const createMQttTopicAgent = async (broker) => {
             RestartPolicy: {
                 Name: 'unless-stopped'
             },
-            NanoCpus: (10 * (10 ** 9)), // 10%
+            NanoCpus: ((10 / 100) * (10 ** 9)), // 10%
             Memory: (100 * 1024 * 1024) // 100mb
         }
     }
@@ -693,7 +693,7 @@ module.exports = {
             await container.stop()
             await container.remove()
         } catch (err) {
-            console.err(err)
+            console.log(err)
         }
     },
     getBrokerAgentState: async (broker) => {
