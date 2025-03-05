@@ -1,8 +1,6 @@
 const got = require('got')
 const FormData = require('form-data')
 const Docker = require('dockerode')
-const path = require('path')
-const { chownSync, mkdirSync, rmSync } = require('fs')
 
 const createContainer = async (project, domain) => {
     const stack = project.ProjectStack.properties
@@ -111,7 +109,7 @@ const createContainer = async (project, domain) => {
             await this._docker.createVolume({
                 Name: volumeName,
                 Labels: {
-                    'flowfuse': 'project-storage',
+                    flowfuse: 'project-storage',
                     'project-id': project.id
                 }
             })
