@@ -105,22 +105,26 @@ const createContainer = async (project, domain) => {
         contOptions.Env.push('NODE_EXTRA_CA_CERTS=/usr/local/ssl-certs/chain.pem')
     }
 
-    if (this._app.config.driver.options?.storage?.enabled && this._app.config.driver.options?.storage?.path) {
+    if (this._app.config.driver.options?.storage?.enabled) {
         try {
-            const localPath = path.join('/opt/persistent-storage', project.id)
-            console.log(`Creating dir in container ${localPath}`)
-            mkdirSync(localPath)
-            chownSync(localPath, 1000, 1000)
+            const volumeName = `flowfuse-${project.id}-storage`
+            await this._docker.createVolume({
+                Name: volumeName,
+                Labels: {
+                    'flowfuse': 'project-storage',
+                    'project-id': project.id
+                }
+            })
+
+            if (Array.isArray(contOptions.HostConfig?.Binds)) {
+                contOptions.HostConfig.Binds.push(`${volumeName}:/data/storage`)
+            } else {
+                contOptions.HostConfig.Binds = [
+                    `${volumeName}:/data/storage`
+                ]
+            }
         } catch (err) {
-            this._app.log.info(`[docker] problem creating persistent storage for ${project.id}`)
-        }
-        const projectPath = path.join(this._app.config.driver.options?.storage?.path, project.id)
-        if (Array.isArray(contOptions.HostConfig?.Binds)) {
-            contOptions.HostConfig.Binds.push(`${projectPath}:/data/storage`)
-        } else {
-            contOptions.HostConfig.Binds = [
-                `${projectPath}:/data/storage`
-            ]
+            this._app.log.error(`[docker] problem creating storage volume for ${project.id}: ${err.message}`)
         }
     }
 
@@ -372,13 +376,12 @@ module.exports = {
             } catch (err) {}
         }
         if (this._app.config.driver.options?.storage?.enabled) {
-            // need to be sure we have permission to delete the dir and it's contents?
             try {
-                // This is better and assumes that directory is mounted on `/opt/storage`
-                const projectPersistentPath = path.join('/opt/persistent-storage', project.id)
-                rmSync(projectPersistentPath, { recursive: true, force: true })
+                const volumeName = `flowfuse-${project.id}-storage`
+                const volume = this._docker.getVolume(volumeName)
+                await volume.remove()
             } catch (err) {
-                this._app.log.error(`[docker] Project ${project.id} - error deleting persistent storage: ${err.stack}`)
+                this._app.log.error(`[docker] Project ${project.id} - error removing storage volume: ${err.stack}`)
             }
         }
         delete this._projects[project.id]
