@@ -180,6 +180,74 @@ const getStaticFileUrl = async (instance, filePath) => {
     return `http://${instance.id}:2880/flowforge/files/_/${encodeURIComponent(filePath)}`
 }
 
+const createMQttTopicAgent = async (broker) => {
+    const image = this._app.config.driver.options?.mqttSchemaContainer || `${this._app.config.driver.options?.registry ? this._app.config.driver.options.registry + '/' : ''}flowfuse/mqtt-schema-agent`
+    const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+    const contOptions = {
+        Image: image,
+        name,
+        Env: [],
+        Labels: {
+            flowforge: 'mqtt-agent'
+        },
+        AttachStdin: false,
+        AttachStdout: false,
+        AttachStderr: false,
+        HostConfig: {
+            NetworkMode: this._network,
+            RestartPolicy: {
+                Name: 'unless-stopped'
+            },
+            NanoCpus: ((10 / 100) * (10 ** 9)), // 10%
+            Memory: (100 * 1024 * 1024) // 100mb
+        }
+    }
+
+    const { token } = await broker.refreshAuthTokens()
+    contOptions.Env.push(`FORGE_TEAM_TOKEN=${token}`)
+    contOptions.Env.push(`FORGE_URL=${this._app.config.api_url}`)
+    contOptions.Env.push(`FORGE_BROKER_ID=${broker.hashid}`)
+    contOptions.Env.push(`FORGE_TEAM_ID=${broker.Team.hashid}`)
+
+    const containerList = await this._docker.listImages()
+    let containerFound = false
+    let stackName = image
+    if (stackName.indexOf(':') === -1) {
+        stackName = stackName + ':latest'
+    }
+    for (const cont of containerList) {
+        if (cont.RepoTags.includes(stackName)) {
+            containerFound = true
+            break
+        }
+    }
+    if (!containerFound) {
+        this._app.log.info(`Container for MQTT Schema Agent not found, pulling ${stackName}`)
+        try {
+            await new Promise((resolve, reject) => {
+                this._docker.pull(stackName, (err, stream) => {
+                    if (!err) {
+                        this._docker.modem.followProgress(stream, onFinished)
+                        function onFinished (err, output) {
+                            if (!err) {
+                                resolve(true)
+                                return
+                            }
+                            reject(err)
+                        }
+                    } else {
+                        reject(err)
+                    }
+                })
+            })
+        } catch (err) {
+            this._app.log.debug(`Error pulling image ${stackName} ${err.message}`)
+        }
+    }
+    const container = await this._docker.createContainer(contOptions)
+    await container.start()
+}
+
 /**
  * Docker Container driver
  *
@@ -256,7 +324,7 @@ module.exports = {
             }
         })
 
-        this._initialCheckTimeout = setTimeout(() => {
+        this._initialCheckTimeout = setTimeout(async () => {
             this._app.log.debug('[docker] Restarting projects')
             projects.forEach(async (project) => {
                 try {
@@ -303,6 +371,50 @@ module.exports = {
                     this._app.log.error(`[docker] Project ${project.id} - error resuming project: ${err.stack}`)
                 }
             })
+
+            if (this._app.db.models.BrokerCredentials) {
+                const brokers = await this._app.db.models.BrokerCredentials.findAll({
+                    include: [{ model: this._app.db.models.Team }]
+                })
+
+                brokers.forEach(async (broker) => {
+                    if (broker.Team) {
+                        if (broker.state === 'running') {
+                            const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+                            this._app.log.info(`[docker] Testing MQTT Agent ${name} container exists`)
+                            this._app.log.debug(`${name}`)
+                            let container
+                            try {
+                                container = await this._docker.listContainers({
+                                    all: true,
+                                    filters: {
+                                        name: [name]
+                                    }
+                                })
+                                if (container[0]) {
+                                    container = await this._docker.getContainer(container[0].Id)
+                                } else {
+                                    container = undefined
+                                }
+                                if (container) {
+                                    const state = await container.inspect()
+                                    if (!state.State.Running) {
+                                        this._app.log.info(`[docker] MQTT Agent ${name} - restarting container [${container.id.substring(0, 12)}]`)
+                                        await container.start()
+                                    } else {
+                                        this._app.log.info(`[docker] MQTT Agent ${name} - already running container [${container.id.substring(0, 12)}]`)
+                                    }
+                                } else {
+                                    this._app.log.info(`[docker] MQTT Agent ${name} - recreating container`)
+                                    createMQttTopicAgent(broker)
+                                }
+                            } catch (err) {
+                                console.log(err)
+                            }
+                        }
+                    }
+                })
+            }
         }, 1000)
 
         return {
@@ -612,6 +724,46 @@ module.exports = {
         } catch (err) {
             err.statusCode = err.response.statusCode
             throw err
+        }
+    },
+
+    // Broker Agent
+    startBrokerAgent: async (broker) => {
+        createMQttTopicAgent(broker)
+    },
+    stopBrokerAgent: async (broker) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        try {
+            const container = await this._docker.getContainer(name)
+            await container.stop()
+            await container.remove()
+        } catch (err) {
+            console.log(err)
+        }
+    },
+    getBrokerAgentState: async (broker) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        try {
+            const status = await got.get(`http://${name}:3500/api/v1/status`).json()
+            return status
+        } catch (err) {
+            return { error: 'error_getting_status', message: err.toString() }
+        }
+    },
+    sendBrokerAgentCommand: async (broker, command) => {
+        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        if (command === 'start' || command === 'restart') {
+            try {
+                await got.post(`http://${name}:3500/api/v1/commands/start`)
+            } catch (err) {
+
+            }
+        } else if (command === 'stop') {
+            try {
+                await got.post(`http://${name}:3500/api/v1/commands/stop`)
+            } catch (err) {
+
+            }
         }
     }
 }
