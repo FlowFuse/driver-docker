@@ -17,7 +17,6 @@ driver:
     logPassthrough: true
     storage:
       enabled: true
-      path: /opt/flowfuse/storage
 ```
 
  - `registry` is the Docker Registry to load Stack Containers from (default: Docker Hub)
