@@ -1,3 +1,9 @@
+#### 2.15.0: Release
+
+ - docs: Remove unused configuration keyfrom README.md (#124) @ppawlowski
+ - Mqtt agent support for Docker (#121) @hardillb
+ - feat: Use docker volume as persistent storage backend for project instances (#123) @ppawlowski
+
 #### 2.14.1: Release
 
 
