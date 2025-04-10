@@ -1,3 +1,9 @@
+#### 2.16.0: Release
+
+ - chore: fix lint script (#128) @ppawlowski
+ - Bump tar-fs and dockerode (#127) @app/dependabot
+ - chore: Pin external actions to commit hash (#126) @ppawlowski
+
 #### 2.15.0: Release
 
  - docs: Remove unused configuration keyfrom README.md (#124) @ppawlowski
