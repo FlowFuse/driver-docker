@@ -765,5 +765,13 @@ module.exports = {
 
             }
         }
+    },
+
+    // Resources API
+    resources: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
+        return await got.get('http://' + project.id + ':2880/flowforge/resources').json()
     }
 }
