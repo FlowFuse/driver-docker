@@ -772,6 +772,15 @@ module.exports = {
         if (this._projects[project.id] === undefined) {
             return { state: 'unknown' }
         }
-        return await got.get('http://' + project.id + ':2880/flowforge/resources').json()
+        const result = await got.get('http://' + project.id + ':2880/flowforge/resources').json()
+        if (Array.isArray(result)) {
+            return {
+                meta: {},
+                resources: result,
+                count: result.length
+            }
+        } else {
+            return result
+        }
     }
 }
