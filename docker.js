@@ -1,6 +1,7 @@
 const got = require('got')
 const FormData = require('form-data')
 const Docker = require('dockerode')
+const { WebSocket } = require('ws')
 
 const createContainer = async (project, domain) => {
     const stack = project.ProjectStack.properties
@@ -765,5 +766,45 @@ module.exports = {
 
             }
         }
+    },
+
+    // Resources API
+    resources: async (project) => {
+        if (this._projects[project.id] === undefined) {
+            return { state: 'unknown' }
+        }
+        const result = await got.get('http://' + project.id + ':2880/flowforge/resources').json()
+        if (Array.isArray(result)) {
+            return {
+                meta: {},
+                resources: result,
+                count: result.length
+            }
+        } else {
+            return result
+        }
+    },
+    resourcesStream: async (project, socket) => {
+        if (this._projects[project.id] === undefined) {
+            throw new Error('Cannot get instance resources')
+        }
+        const url = 'ws://' + project.id + ':2800/flowforge/resources'
+        const resourceStream = new WebSocket(url, {})
+
+        resourceStream.on('message', (data) => {
+            socket.send(data)
+        })
+        resourceStream.on('error', (err) => {
+            this._app.log.error(`Error in resource stream: ${err}`)
+            socket.close()
+        })
+        socket.on('close', () => {
+            try {
+                resourceStream.close()
+            } catch (_err) {
+                // ignore error
+            }
+        })
+        return resourceStream
     }
 }
