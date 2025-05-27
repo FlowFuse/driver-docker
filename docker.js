@@ -801,8 +801,8 @@ module.exports = {
         socket.on('close', () => {
             try {
                 resourceStream.close()
-            } catch (err) {
-                // this._app.log.error(`Error closing resource stream: ${err}`)
+            } catch (_err) {
+	                // ignore error
             }
         })
         return resourceStream
