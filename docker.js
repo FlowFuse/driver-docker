@@ -802,7 +802,7 @@ module.exports = {
             try {
                 resourceStream.close()
             } catch (_err) {
-	                // ignore error
+                // ignore error
             }
         })
         return resourceStream
