@@ -1,3 +1,8 @@
+#### 2.18.0: Release
+
+ - Bump tar-fs from 2.1.2 to 2.1.3 (#133) @app/dependabot
+ - Add Resources API endpoint (#132) @hardillb
+
 #### 2.17.0: Release
 
  - Bump actions/setup-node from 4.3.0 to 4.4.0 (#130)
