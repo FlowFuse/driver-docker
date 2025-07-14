@@ -135,7 +135,7 @@ const createContainer = async (project, domain) => {
         stackName = stackName + ':latest'
     }
     for (const cont of containerList) {
-        if (cont.RepoTags.includes(stackName)) {
+        if (cont.RepoTags?.includes(stackName)) {
             containerFound = true
             break
         }
@@ -217,7 +217,7 @@ const createMQttTopicAgent = async (broker) => {
         stackName = stackName + ':latest'
     }
     for (const cont of containerList) {
-        if (cont.RepoTags.includes(stackName)) {
+        if (cont.RepoTags?.includes(stackName)) {
             containerFound = true
             break
         }
