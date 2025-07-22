@@ -1,3 +1,8 @@
+#### 2.19.1: Release
+
+ - Bump form-data from 4.0.0 to 4.0.4 (#138) @app/dependabot
+ - Don't crash on unamed/untagged images (#137) @hardillb
+
 #### 2.19.0: Release
 
 
