@@ -211,7 +211,7 @@ const createMQttTopicAgent = async (broker) => {
     contOptions.Env.push(`FORGE_BROKER_ID=${agent ? 'team-broker' : broker.hashid}`)
     contOptions.Env.push(`FORGE_TEAM_ID=${broker.Team.hashid}`)
     if (agent) {
-        contOptions.Env.push(`FORGE_TIMEOUT=24`)
+        contOptions.Env.push('FORGE_TIMEOUT=24')
     }
 
     const containerList = await this._docker.listImages()
