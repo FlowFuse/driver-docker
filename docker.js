@@ -181,9 +181,16 @@ const getStaticFileUrl = async (instance, filePath) => {
     return `http://${instance.id}:2880/flowforge/files/_/${encodeURIComponent(filePath)}`
 }
 
+const getBrokerName = (broker) => {
+    const agent = broker.constructor.name === 'TeamBrokerAgent'
+    const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${agent ? 'team-broker' : broker.hashid.toLowerCase()}`
+    return name
+}
+
 const createMQttTopicAgent = async (broker) => {
+    const agent = broker.constructor.name === 'TeamBrokerAgent'
     const image = this._app.config.driver.options?.mqttSchemaContainer || `${this._app.config.driver.options?.registry ? this._app.config.driver.options.registry + '/' : ''}flowfuse/mqtt-schema-agent`
-    const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+    const name = getBrokerName(broker)
     const contOptions = {
         Image: image,
         name,
@@ -207,8 +214,11 @@ const createMQttTopicAgent = async (broker) => {
     const { token } = await broker.refreshAuthTokens()
     contOptions.Env.push(`FORGE_TEAM_TOKEN=${token}`)
     contOptions.Env.push(`FORGE_URL=${this._app.config.api_url}`)
-    contOptions.Env.push(`FORGE_BROKER_ID=${broker.hashid}`)
+    contOptions.Env.push(`FORGE_BROKER_ID=${agent ? 'team-broker' : broker.hashid}`)
     contOptions.Env.push(`FORGE_TEAM_ID=${broker.Team.hashid}`)
+    if (agent) {
+        contOptions.Env.push('FORGE_TIMEOUT=24')
+    }
 
     const containerList = await this._docker.listImages()
     let containerFound = false
@@ -381,7 +391,7 @@ module.exports = {
                 brokers.forEach(async (broker) => {
                     if (broker.Team) {
                         if (broker.state === 'running') {
-                            const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+                            const name = getBrokerName(broker)
                             this._app.log.info(`[docker] Testing MQTT Agent ${name} container exists`)
                             this._app.log.debug(`${name}`)
                             let container
@@ -733,7 +743,7 @@ module.exports = {
         createMQttTopicAgent(broker)
     },
     stopBrokerAgent: async (broker) => {
-        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        const name = getBrokerName(broker)
         try {
             const container = await this._docker.getContainer(name)
             await container.stop()
@@ -743,7 +753,7 @@ module.exports = {
         }
     },
     getBrokerAgentState: async (broker) => {
-        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        const name = getBrokerName(broker)
         try {
             const status = await got.get(`http://${name}:3500/api/v1/status`).json()
             return status
@@ -752,7 +762,7 @@ module.exports = {
         }
     },
     sendBrokerAgentCommand: async (broker, command) => {
-        const name = `mqtt-schema-agent-${broker.Team.hashid.toLowerCase()}-${broker.hashid.toLowerCase()}`
+        const name = getBrokerName(broker)
         if (command === 'start' || command === 'restart') {
             try {
                 await got.post(`http://${name}:3500/api/v1/commands/start`)
