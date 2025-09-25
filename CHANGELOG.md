@@ -1,3 +1,9 @@
+#### 2.22.0: Release
+
+ - Bump JS-DevTools/npm-publish from 3.1.1 to 4.0.0 (#148)
+ - add team broker mqtt agent support (#147) @hardillb
+ - Bump JS-DevTools/npm-publish from 4.0.0 to 4.0.1 (#149) @app/dependabot
+
 #### 2.21.2: Release
 
  - Bump actions/setup-node from 4.4.0 to 5.0.0 (#145)
