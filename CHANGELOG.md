@@ -1,3 +1,8 @@
+#### 2.22.1: Release
+
+ - Bump JS-DevTools/npm-publish from 4.0.1 to 4.1.1 (#152) @app/dependabot
+ - Bump tar-fs from 2.1.3 to 2.1.4 (#151) @app/dependabot
+
 #### 2.22.0: Release
 
  - Bump JS-DevTools/npm-publish from 3.1.1 to 4.0.0 (#148)
