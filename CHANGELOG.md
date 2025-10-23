@@ -1,3 +1,7 @@
+#### 2.23.0: Release
+
+ - Bump actions/setup-node from 5.0.0 to 6.0.0 (#154)
+
 #### 2.22.1: Release
 
  - Bump JS-DevTools/npm-publish from 4.0.1 to 4.1.1 (#152) @app/dependabot
