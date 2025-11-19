@@ -798,7 +798,7 @@ module.exports = {
         if (this._projects[project.id] === undefined) {
             throw new Error('Cannot get instance resources')
         }
-        const url = 'ws://' + project.id + ':2800/flowforge/resources'
+        const url = 'ws://' + project.id + ':2880/flowforge/resources'
         const resourceStream = new WebSocket(url, {})
 
         resourceStream.on('message', (data) => {
