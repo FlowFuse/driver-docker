@@ -1,3 +1,8 @@
+#### 2.24.0: Release
+
+ - Fix port for Performance data (#159)
+ - Bump js-yaml from 4.1.0 to 4.1.1 (#157) @app/dependabot
+
 #### 2.23.1: Release
 
 
