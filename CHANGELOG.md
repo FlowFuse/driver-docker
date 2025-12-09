@@ -1,3 +1,9 @@
+#### 2.24.5: Release
+
+ - Update Node.js version in build workflow (#168)
+ - Bump actions/setup-node from 6.0.0 to 6.1.0 (#166)
+ - Bump actions/checkout from 6.0.0 to 6.0.1 (#167) @app/dependabot
+
 #### 2.24.4: Release
 
 
