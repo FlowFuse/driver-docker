@@ -357,7 +357,7 @@ module.exports = {
                             container = undefined
                         }
                     } catch (err) {
-                        console.log(err)
+                        console.error(err)
                     }
                     if (container) {
                         const state = await container.inspect()
@@ -420,7 +420,7 @@ module.exports = {
                                     createMQttTopicAgent(broker)
                                 }
                             } catch (err) {
-                                console.log(err)
+                                console.error(err)
                             }
                         }
                     }
@@ -749,7 +749,7 @@ module.exports = {
             await container.stop()
             await container.remove()
         } catch (err) {
-            console.log(err)
+            console.error(err)
         }
     },
     getBrokerAgentState: async (broker) => {
