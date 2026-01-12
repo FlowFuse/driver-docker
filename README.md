@@ -17,6 +17,7 @@ driver:
     logPassthrough: true
     storage:
       enabled: true
+    proxy: nginx
 ```
 
  - `registry` is the Docker Registry to load Stack Containers from (default: Docker Hub)
@@ -24,6 +25,7 @@ driver:
  - `privateCA`: is the fully qualified path to a pem file containing trusted CA cert chain (default: not set)
  - `logPassthrough` Have Node-RED logs printed in JSON format to container stdout (default: false)
  - `storage.enabled` enables volume-based persistent storage for Node-RED instance (default: false)
+ - `proxy` which reverse proxy to use: nginx or traefik (default: nginx)
 
 ### Configuration via environment variables
 

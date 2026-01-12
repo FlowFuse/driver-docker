@@ -53,7 +53,18 @@ const createContainer = async (project, domain) => {
     // TODO this needs to come from a central point
     contOptions.Env.push('FORGE_URL=' + this._app.config.api_url)
     contOptions.Env.push(`BASE_URL=${projectURL}`)
-    contOptions.Env.push(`VIRTUAL_HOST=${hostname}`)
+
+    if (this._app.config.driver.options?.proxy === 'traefik') {
+        // traefik
+        contOptions.Labels.traefik.enable = 'true'
+        contOptions.Labels.traefik.http.routers[`fowfuse-${project.id}`].rule = 'Host(`' + hostname * '`)'
+        contOptions.Labels.traefik.http.services[`fowfuse-${project.id}`].loadbalancer.server.port = "1880"
+        // TODO: service name, entrypoints, certresolver via variable?
+    } else {
+        // default: nginx
+        contOptions.Env.push(`VIRTUAL_HOST=${hostname}`)
+    }
+
     if (baseURL.protocol === 'https:') {
         contOptions.Env.push(`LETSENCRYPT_HOST=${hostname}`)
     }
