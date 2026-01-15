@@ -1,3 +1,10 @@
+#### 2.26.0: Release
+
+ - Bump JS-DevTools/npm-publish from 4.1.2 to 4.1.3 (#176)
+ - Bump JS-DevTools/npm-publish from 4.1.1 to 4.1.2 (#174) @app/dependabot
+ - fix eqeqeq & quotes (#175) @hardillb
+ - Convert to eslint v9 (#173) @hardillb
+
 #### 2.25.0: Release
 
 
