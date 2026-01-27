@@ -1,3 +1,11 @@
+#### 2.26.1: Release
+
+ - Bump JS-DevTools/npm-publish from 4.1.3 to 4.1.4 (#179)
+ - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#181)
+ - Bump actions/checkout from 6.0.1 to 6.0.2 (#182)
+ - Bump actions/setup-node from 6.1.0 to 6.2.0 (#180)
+ - ci: Enable SAST (#177) @ppawlowski
+
 #### 2.26.0: Release
 
  - Bump JS-DevTools/npm-publish from 4.1.2 to 4.1.3 (#176)
