@@ -1,6 +1,6 @@
 {
     "name": "@flowfuse/driver-docker",
-    "version": "2.26.1",
+    "version": "2.26.2",
     "description": "Docker driver for FlowFuse",
     "main": "docker.js",
     "scripts": {
