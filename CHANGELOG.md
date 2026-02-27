@@ -1,3 +1,7 @@
+#### 2.27.1: Release
+
+ - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#188)
+
 #### 2.27.0: Release
 
  - Bump JS-DevTools/npm-publish from 4.1.4 to 4.1.5 (#184)
