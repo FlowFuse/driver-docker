@@ -1,3 +1,10 @@
+#### 2.28.0: Release
+
+ - Bump actions/setup-node from 6.2.0 to 6.3.0 (#193)
+ - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#192)
+ - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#191)
+ - Bump minimatch (#190) @app/dependabot
+
 #### 2.27.1: Release
 
  - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#188)
