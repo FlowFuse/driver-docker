@@ -1,3 +1,8 @@
+#### 2.28.1: Release
+
+ - ci: Use NodeJS v24 as a default GitHub Actions runtime (#196) @ppawlowski
+ - Bump flatted from 3.3.3 to 3.4.2 (#195) @app/dependabot
+
 #### 2.28.0: Release
 
  - Bump actions/setup-node from 6.2.0 to 6.3.0 (#193)
