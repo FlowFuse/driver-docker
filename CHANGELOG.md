@@ -1,3 +1,7 @@
+#### 2.29.0: Release
+
+ - Bump picomatch from 4.0.3 to 4.0.4 (#198) @app/dependabot
+
 #### 2.28.1: Release
 
  - ci: Use NodeJS v24 as a default GitHub Actions runtime (#196) @ppawlowski
