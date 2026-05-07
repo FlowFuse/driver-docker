@@ -1,3 +1,11 @@
+#### 2.30.0: Release
+
+ - Bump actions/setup-node from 6.3.0 to 6.4.0 (#205)
+ - Bump flowfuse/github-actions-workflows/.github/workflows/sast_scan.yaml (#206)
+ - ci: Use new project-automation workflow (#208) @ppawlowski
+ - Bump uuid and dockerode (#207) @app/dependabot
+ - Bump protobufjs from 7.4.0 to 7.5.5 (#204) @app/dependabot
+
 #### 2.29.1: Release
 
 
