@@ -1,3 +1,10 @@
+#### 2.31.0: Release
+
+ - Switch internal reusable workflows to new tagging approach (#215)
+ - Bump protobufjs from 7.5.5 to 7.5.8 (#214) @app/dependabot
+ - Bump @protobufjs/utf8 from 1.1.0 to 1.1.1 (#213) @app/dependabot
+ - ci: enable dependabot cooldown (#212) @ppawlowski
+
 #### 2.30.1: Release
 
 
