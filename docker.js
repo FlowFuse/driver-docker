@@ -693,17 +693,15 @@ module.exports = {
             throw new Error('Instance cannot call MCP tool')
         }
         try {
-            const data = {
-                cmd: 'mcp:call-tool',
-                data: {
-                    endpoint,
-                    name,
-                    input
-                }
-            }
-            const json = JSON.parse(JSON.stringify(data))
             const response = await got.post('http://' + project.id + ':2880/flowforge/command', {
-                json
+                json: {
+                    cmd: 'mcp:call-tool',
+                    data: {
+                        endpoint,
+                        name,
+                        input
+                    }
+                }
             }).json()
             return response
         } catch (error) {
