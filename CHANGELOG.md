@@ -1,3 +1,13 @@
+#### 2.32.0: Release
+
+ - feat: Add Insights support with get-features and call-tool/read-resource methods (#226)
+ - Bump actions/checkout from 6.0.3 to 7.0.0 (#225)
+ - ci: set dependabot pull request limit to 30 (#224)
+ - Bump js-yaml from 4.1.1 to 4.2.0 (#223)
+ - Bump form-data from 4.0.4 to 4.0.6 (#222)
+ - Bump actions/checkout from 6.0.2 to 6.0.3 (#217)
+ - Bump @grpc/grpc-js from 1.13.2 to 1.14.4 (#220)
+
 #### 2.31.3: Release
 
 
