@@ -1,3 +1,7 @@
+#### 2.32.1: Release
+
+ - ci: Add slack notification to the release pipeline (#228)
+
 #### 2.32.0: Release
 
  - feat: Add Insights support with get-features and call-tool/read-resource methods (#226)
