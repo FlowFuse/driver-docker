@@ -1,3 +1,8 @@
+#### 2.33.0: Release
+
+ - Bump actions/checkout from 7.0.0 to 7.0.1 (#231)
+ - Bump actions/setup-node from 6.4.0 to 7.0.0 (#229)
+
 #### 2.32.1: Release
 
  - ci: Add slack notification to the release pipeline (#228)
