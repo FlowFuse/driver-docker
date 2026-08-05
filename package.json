@@ -21,7 +21,7 @@
     },
     "license": "Apache-2.0",
     "dependencies": {
-        "dockerode": "^5.0.0",
+        "dockerode": "^5.0.1",
         "form-data": "^4.0.0",
         "got": "^11.8.0"
     },
