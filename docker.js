@@ -1,4 +1,4 @@
-const got = require('got')
+const got = require('got').extend({ retry: { limit: 0 } })
 const FormData = require('form-data')
 const Docker = require('dockerode')
 const { WebSocket } = require('ws')
