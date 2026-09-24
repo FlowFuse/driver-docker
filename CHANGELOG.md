@@ -1,3 +1,8 @@
+#### 3.1.0: Release
+
+ - Bump js-yaml from 4.3.1 to 4.3.2 (#245)
+ - Bump @humanfs/node from 0.16.7 to 0.16.8 (#243)
+
 #### 3.0.2: Release
 
 
