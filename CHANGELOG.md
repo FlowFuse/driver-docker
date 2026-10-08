@@ -1,3 +1,8 @@
+#### 3.1.1: Release
+
+ - Bump @grpc/grpc-js from 1.14.4 to 1.14.5 (#249)
+ - Await file requests so launcher errors keep their status code (#248)
+
 #### 3.1.0: Release
 
  - Bump js-yaml from 4.3.1 to 4.3.2 (#245)
