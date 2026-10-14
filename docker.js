@@ -843,7 +843,7 @@ module.exports = {
 
     // Broker Agent
     startBrokerAgent: async (broker) => {
-        createMQttTopicAgent(broker)
+        await createMQttTopicAgent(broker)
     },
     stopBrokerAgent: async (broker) => {
         const name = getBrokerName(broker)
