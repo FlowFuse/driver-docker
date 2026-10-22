@@ -1,3 +1,9 @@
+#### 3.2.0: Release
+
+ - Wait for the broker schema agent to launch in startBrokerAgent (#254)
+ - Bump actions/setup-node from 7.0.0 to 7.1.0 (#252)
+ - Bump brace-expansion (#251)
+
 #### 3.1.1: Release
 
  - Bump @grpc/grpc-js from 1.14.4 to 1.14.5 (#249)
