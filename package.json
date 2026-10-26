@@ -23,7 +23,7 @@
     "dependencies": {
         "dockerode": "^5.0.1",
         "form-data": "^4.0.0",
-        "got": "^11.8.0"
+        "got": "^16.1.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.2",
