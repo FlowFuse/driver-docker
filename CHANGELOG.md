@@ -1,3 +1,7 @@
+#### 3.3.0: Release
+
+ - chore: Group dev dependabot (#257)
+
 #### 3.2.0: Release
 
  - Wait for the broker schema agent to launch in startBrokerAgent (#254)
