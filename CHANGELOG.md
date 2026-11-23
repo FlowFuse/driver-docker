@@ -1,3 +1,7 @@
+#### 3.3.1: Release
+
+ - Bump minimatch, @typescript-eslint/utils and typescript-eslint (#265)
+
 #### 3.3.0: Release
 
  - chore: Group dev dependabot (#257)
